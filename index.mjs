@@ -1,9 +1,9 @@
-const express = require('express');
-// import express from 'express';
-const bodyParser = require('body-parser');
-// import bodyParser from 'body-parser';
-const fetch = require('node-fetch');
-// import fetch from 'node-fetch';
+// const express = require('express');
+import express from 'express';
+// const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
+// const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 const app = express();
 app.use(bodyParser.json());
