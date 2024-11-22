@@ -8,7 +8,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Replace with your credentials
-const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/518752407978132/messages';
+const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/457951767408582/messages';
 const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN; // Add to .env file
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN; // Add to .env file
 
@@ -77,7 +77,7 @@ async function fetchVehicleInfo(vehicleNumber) {
 // Webhook for incoming messages
 app.post('/webhook', async (req, res) => {
   const body = req.body;
-  console.log(body);
+  // console.log(body);
   if (body.object && body.entry && body.entry[0].changes[0].value.messages) {
     const messages = body.entry[0].changes[0].value.messages;
 
