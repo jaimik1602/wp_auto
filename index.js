@@ -37,7 +37,7 @@ async function sendMessage(recipient, text) {
 // Fetch vehicle information with detailed error handling
 async function fetchVehicleInfo(vehicleNumber) {
   const url = `https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`;
-  console.log(url);
+  // console.log(url);
   await sendMessage(chatId, `${url}`);
   try {
     const response = await axios.get(url);
