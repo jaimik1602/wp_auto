@@ -91,6 +91,7 @@ app.post('/webhook', async (req, res) => {
 
       // Step 1: Handle "hi" message
       if (messageContent === 'hi') {
+        console.log('work');
         await sendMessage(chatId, 'Hello! Please enter your vehicle number:');
         userState.awaitingVehicleNumber = true;
         userState.attempts = 0;
