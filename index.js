@@ -83,6 +83,7 @@ app.post('/webhook', async (req, res) => {
 
     for (const message of messages) {
       const chatId = message.from;
+      console.log('Message from:', chatId);
       const messageType = message.type;
       const messageContent = message.text?.body?.trim().toLowerCase();
 
