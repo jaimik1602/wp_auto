@@ -37,11 +37,8 @@ async function sendMessage(recipient, text) {
 // Fetch vehicle information with detailed error handling
 async function fetchVehicleInfo(vehicleNumber) {
   const url = `https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`;
-  // console.log(url);
-  // await sendMessage(918511305416, `${url}`);
   try {
     const response = await axios.get(url);
-    await sendMessage(918511305416, `${response.data[0].deviceid}`);
     if (response.data && response.data.length > 0) {
       return { success: true, data: response.data };
     } else {
@@ -51,6 +48,7 @@ async function fetchVehicleInfo(vehicleNumber) {
       };
     }
   } catch (error) {
+    await sendMessage(918511305416, `${error}`);
     if (error.response) {
       return {
         success: false,
@@ -173,7 +171,7 @@ app.post('/webhook', async (req, res) => {
 
 // Webhook Verification
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = 'YOUR_VERIFY_TOKEN';
+  // const VERIFY_TOKEN = VERIFY_TOKEN;
 
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
