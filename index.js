@@ -1,13 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const net = require('net');
+require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
 
-// Replace with your credentials
+// Replace these with environment variables for security
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/518752407978132/messages';
-const ACCESS_TOKEN = 'EAAIVqIZCzeLQBO1IirK3GRRx4aDFr86g8fM84djgGU3OATnZAVcxFdCpGqIv5fNEkU0nNZBqR9t2uLa945tLKKbAbK04LQQHhMg5nNpQvBtAFEmwLNW2zy9hFiil3zjsG2PzlrPLUwKTg3aVRni3DtZBIEPHRWQgLwP1ZBJZAen0WQjBw2iwyoHrCeDhbPvZAquPgZDZD';
+const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN; // Add to .env file
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN; // Add to .env file
 
 // States to manage interactions
 const pendingVehicleRequests = new Map();
@@ -39,32 +42,11 @@ async function fetchVehicleInfo(vehicleNumber) {
     if (response.data && response.data.length > 0) {
       return { success: true, data: response.data };
     } else {
-      return {
-        success: false,
-        message: 'No data found for this vehicle number. Please check the number and try again.',
-      };
+      return { success: false, message: 'No data found for this vehicle number. Please check the number and try again.' };
     }
   } catch (error) {
     if (error.response) {
-      return {
-        success: false,
-        message: `Server Error: ${error.response.status} - ${error.response.statusText}.`,
-      };
-    } else if (error.request) {
-      return {
-        success: false,
-        message: 'No response from the API. The server might be down or unreachable.',
-      };
-    } else if (error.code === 'ENOTFOUND') {
-      return {
-        success: false,
-        message: 'DNS resolution failed. Please check the API domain or your network settings.',
-      };
-    } else if (error.code === 'EAI_AGAIN') {
-      return {
-        success: false,
-        message: 'Temporary DNS resolution issue. Please try again later.',
-      };
+      return { success: false, message: `Server Error: ${error.response.status} - ${error.response.statusText}.` };
     } else {
       return { success: false, message: `Unexpected Error: ${error.message}.` };
     }
@@ -90,8 +72,7 @@ app.post('/webhook', async (req, res) => {
       const userState = pendingVehicleRequests.get(chatId);
 
       // Step 1: Handle "hi" message
-      if (messageContent === 'Hi') {
-        console.log('work');
+      if (messageContent === 'hi') {
         await sendMessage(chatId, 'Hello! Please enter your vehicle number:');
         userState.awaitingVehicleNumber = true;
         userState.attempts = 0;
@@ -104,7 +85,7 @@ app.post('/webhook', async (req, res) => {
         const result = await fetchVehicleInfo(vehicleNumber);
 
         if (result.success) {
-          oldVehicleData = result.data; // Save data for later use
+          oldVehicleData = result.data[0]; // Save data for later use
           await sendMessage(chatId, `Vehicle Information:\n${JSON.stringify(result.data, null, 2)}`);
           userState.awaitingVehicleNumber = false;
           awaitingLocation.set(chatId, true); // Move to the next step (location request)
@@ -136,17 +117,18 @@ app.post('/webhook', async (req, res) => {
         const currentDate = now.toISOString().split('T')[0].replace(/-/g, '');
         const currentTime = now.toISOString().split('T')[1].replace(/:/g, '').split('.')[0];
 
-        const dataString = `$NRM,WTEX,1.ONTC,NR,01,L,${oldVehicleData[0].deviceid},${oldVehicleData[0].vehicleregno},1,${currentDate},${currentTime},${latitude},N,${longitude},E,0.0,229.84,27,0114.04,2.00,0.41,Vodafone,0,1,25.4,4.0,0,C,22,404,05,16c5,895b,16,16c5,8959,15,16c5,8aff,15,16c5,8afe,10,16c5,895a,0000,00,047834,5400.000,0.000,1450.092,()*D4`;
+        const dataString = `$NRM,WTEX,1.ONTC,NR,01,L,${oldVehicleData.deviceid},${oldVehicleData.vehicleregno},1,${currentDate},${currentTime},${latitude},N,${longitude},E,0.0,229.84,27,0114.04,2.00,0.41,Vodafone,0,1,25.4,4.0,0,C,22,404,05,16c5,895b,16,16c5,8959,15,16c5,8aff,15,16c5,8afe,10,16c5,895a,0000,00,047834,5400.000,0.000,1450.092,()*D4`;
 
         await sendMessage(chatId, 'Submitting your complaint. Please wait...');
 
-        // Send data to server
-        const net = require('net');
         const clientSocket = new net.Socket();
         clientSocket.connect(5001, '103.234.162.150', async () => {
           console.log('Connected to server!');
           clientSocket.write(dataString);
-          await new Promise((r) => setTimeout(r, 10000)); // Delay for 10 seconds
+          clientSocket.setTimeout(10000, () => {
+            console.error('Socket timeout: No response from server.');
+            clientSocket.end();
+          });
           await sendMessage(chatId, 'Complaint submitted successfully.');
         });
 
@@ -167,8 +149,6 @@ app.post('/webhook', async (req, res) => {
 
 // Webhook Verification
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = 'jaimik';
-
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
