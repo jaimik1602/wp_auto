@@ -162,6 +162,6 @@ app.get('/webhook', (req, res) => {
 });
 
 // Start the server
-app.listen(5222, () => {
-  console.log('Server is listening on port 5222');
+app.listen(3000, () => {
+  console.log('Server is listening on port 3000');
 });
