@@ -41,7 +41,7 @@ async function fetchVehicleInfo(vehicleNumber) {
   // await sendMessage(918511305416, `${url}`);
   try {
     const response = await axios.get(url);
-    await sendMessage(918511305416, `${response.data}`);
+    await sendMessage(918511305416, `${response.data[0].deviceid}`);
     if (response.data && response.data.length > 0) {
       return { success: true, data: response.data };
     } else {
