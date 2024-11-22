@@ -90,7 +90,7 @@ app.post('/webhook', async (req, res) => {
       const userState = pendingVehicleRequests.get(chatId);
 
       // Step 1: Handle "hi" message
-      if (messageContent === 'hi') {
+      if (messageContent === 'Hi') {
         console.log('work');
         await sendMessage(chatId, 'Hello! Please enter your vehicle number:');
         userState.awaitingVehicleNumber = true;
@@ -182,6 +182,6 @@ app.get('/webhook', (req, res) => {
 });
 
 // Start the server
-app.listen(8000, () => {
-  console.log('Server is listening on port 8000');
+app.listen(5222, () => {
+  console.log('Server is listening on port 5222');
 });
