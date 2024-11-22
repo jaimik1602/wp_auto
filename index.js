@@ -19,6 +19,7 @@ let oldVehicleData = null;
 
 // Helper function to send a WhatsApp message
 async function sendMessage(recipient, text) {
+  console.log('sendMessage Called');
   try {
     await axios.post(
       WHATSAPP_API_URL,
@@ -36,6 +37,7 @@ async function sendMessage(recipient, text) {
 
 // Fetch vehicle information with detailed error handling
 async function fetchVehicleInfo(vehicleNumber) {
+  console.log('fetchVehicleInfo Called');
   const url = `https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`;
   try {
     const response = await axios.get(url);
@@ -56,6 +58,7 @@ async function fetchVehicleInfo(vehicleNumber) {
 // Webhook for incoming messages
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  console.log('post Called');
 
   if (body.object && body.entry && body.entry[0].changes[0].value.messages) {
     const messages = body.entry[0].changes[0].value.messages;
@@ -72,7 +75,8 @@ app.post('/webhook', async (req, res) => {
       const userState = pendingVehicleRequests.get(chatId);
 
       // Step 1: Handle "hi" message
-      if (messageContent === 'hi') {
+      if (messageContent === 'hi' || messageContent === 'Hi') {
+        console.log('hi Called');
         await sendMessage(chatId, 'Hello! Please enter your vehicle number:');
         userState.awaitingVehicleNumber = true;
         userState.attempts = 0;
@@ -81,6 +85,8 @@ app.post('/webhook', async (req, res) => {
 
       // Step 2: Handle vehicle number input
       if (userState.awaitingVehicleNumber) {
+        console.log('fetchVehicleInfo Called fetch');
+
         const vehicleNumber = messageContent.toUpperCase();
         const result = await fetchVehicleInfo(vehicleNumber);
 
