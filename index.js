@@ -6,8 +6,8 @@ const app = express();
 app.use(bodyParser.json());
 
 // Replace with your credentials
-const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/457951767408582/messages';
-const ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN';
+const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/518752407978132/messages';
+const ACCESS_TOKEN = 'EAAIVqIZCzeLQBO1IirK3GRRx4aDFr86g8fM84djgGU3OATnZAVcxFdCpGqIv5fNEkU0nNZBqR9t2uLa945tLKKbAbK04LQQHhMg5nNpQvBtAFEmwLNW2zy9hFiil3zjsG2PzlrPLUwKTg3aVRni3DtZBIEPHRWQgLwP1ZBJZAen0WQjBw2iwyoHrCeDhbPvZAquPgZDZD';
 
 // States to manage interactions
 const pendingVehicleRequests = new Map();
@@ -166,7 +166,7 @@ app.post('/webhook', async (req, res) => {
 
 // Webhook Verification
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = 'YOUR_VERIFY_TOKEN';
+  const VERIFY_TOKEN = 'jaimik';
 
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -181,6 +181,6 @@ app.get('/webhook', (req, res) => {
 });
 
 // Start the server
-app.listen(3000, () => {
+app.listen(8000, () => {
   console.log('Server is listening on port 3000');
 });
