@@ -54,17 +54,18 @@ app.post('/webhook', async (req, res) => {
                 await sendWhatsAppMessage(from, 'Submitting your complaint. Please wait...');
                 const { latitude, longitude } = message.location;
                 const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
+                console.log(url);
                 const response = await axios.get(url);
+                if (response.data[0]['msg'] == "success") {
+                    await sendWhatsAppMessage(
+                        from,
+                        `Complaint submitted successfully.`
+                    );
+                    delete userStates[from]; // Reset user state after completion
+                }
             } else {
                 console.error('Expected location but did not receive any.');
                 await sendWhatsAppMessage(from, 'Please share your location using the attachment icon.');
-            }
-            if (response.data > 0) {
-                await sendWhatsAppMessage(
-                    from,
-                    `Complaint submitted successfully.`
-                );
-                delete userStates[from]; // Reset user state after completion
             }
         } else {
             await sendWhatsAppMessage(from, 'Sorry, I didn\'t understand that. Please start again by saying "Hi".');
@@ -96,7 +97,6 @@ async function fetchVehicle(vehicleNumber, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await axios.get(url);
-            console.log(`${response} + RS`);
             if (response.data && response.data.length > 0) {
                 return { success: true, data: response.data };
             } else {
