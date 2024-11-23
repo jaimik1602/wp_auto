@@ -42,7 +42,19 @@ app.post('/webhook', async (req, res) => {
                 await sendInteractiveMessage(from, 'Vehicle details not found.');
             } else {
                 console.log(userState.imei);
-                await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, [{ id: 'update_device', title: 'Update From Device' }, { id: 'update_link', title: 'Update From Link' }]);
+                // await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, [{ id: 'update_device', title: 'Update From Device' }, { id: 'update_link', title: 'Update From Link' }]);
+                try {
+                    await sendInteractiveMessage(from,
+                        `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`,
+                        [
+                            { id: 'update_device', title: 'Update From Device' },
+                            { id: 'update_link', title: 'Update From Link' }
+                        ]
+                    );
+                } catch (error) {
+                    console.error('Error sending interactive message:', error);
+                }
+
             }
             userState.step = 2;
         } else if (userState.step === 2) {
