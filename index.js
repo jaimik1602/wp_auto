@@ -31,7 +31,7 @@ app.post('/webhook', async (req, res) => {
     const userState = userStates[from];
 
     try {
-        if (userState.step === 0 && text.toLowerCase() === 'hi') {
+        if (userState.step === 0 && text.toLowerCase() == 'hi' ) {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
