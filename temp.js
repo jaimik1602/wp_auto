@@ -12,7 +12,7 @@ async function fetchVehicleInfo() {
         const response = await axios.get(url);
         if (response.data && response.data.length > 0) {
             var temp = response.data[0];
-            return { success: true, data: temp['agency'] };
+            return { success: true, data: temp };
         } else {
             return {
                 success: false,
