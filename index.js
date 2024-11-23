@@ -31,7 +31,7 @@ app.post('/webhook', async (req, res) => {
     const userState = userStates[from];
 
     try {
-        if (userState.step === 0 && text.toLowerCase() == 'hi' ) {
+        if (userState.step === 0 && text.toLowerCase() == 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
@@ -100,7 +100,37 @@ async function sendInteractiveMessage(to, text, buttonText) {
 
 // Function to request location sharing
 async function sendLocationRequest(to) {
-    await sendWhatsAppMessage(to, 'Please share your current location.');
+    // Function to request location sharing with an interactive button
+    async function sendLocationRequest(to) {
+        await axios.post(
+            WHATSAPP_API_URL,
+            {
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                type: 'interactive',
+                to,
+                interactive: {
+                    type: 'button',
+                    body: {
+                        text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
+                    },
+                    action: {
+                        buttons: [
+                            {
+                                type: 'reply',
+                                reply: {
+                                    id: 'share_location',
+                                    title: 'Share Location',
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
+            { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+        );
+    }
+
 }
 
 // Webhook verification endpoint
