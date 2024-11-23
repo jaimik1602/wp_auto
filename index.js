@@ -78,6 +78,8 @@ async function sendInteractiveMessage(to, text, buttonText) {
         WHATSAPP_API_URL,
         {
             messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            type: 'interactive',
             to,
             interactive: {
                 type: 'button',
