@@ -84,42 +84,42 @@ async function fetchVehicle(vehicleNumber, retries = 3) {
 
     const response = await axios.get(url);
     console.log(`${response} + responce`);
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
+    // for (let attempt = 1; attempt <= retries; attempt++) {
+    //     try {
             
             
-            if (response.data && response.data.length > 0) {
-                return { success: true, data: response.data };
-            } else {
-                return {
-                    success: false,
-                    message: 'No data found for this vehicle number. Please check the number and try again.',
-                };
-            }
-        } catch (error) {
-            if (error.code === 'EAI_AGAIN' && attempt < retries) {
-                console.log(`Retrying... Attempt ${attempt}/${retries}`);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retrying
-            } else if (error.response) {
-                return {
-                    success: false,
-                    message: `Server Error: ${error.response.status} - ${error.response.statusText}.`,
-                };
-            } else if (error.request) {
-                return {
-                    success: false,
-                    message: 'No response from the API. The server might be down or unreachable.',
-                };
-            } else if (error.code === 'ENOTFOUND') {
-                return {
-                    success: false,
-                    message: 'DNS resolution failed. Please check the API domain or your network settings.',
-                };
-            } else {
-                return { success: false, message: `Unexpected Error: ${error.message}.` };
-            }
-        }
-    }
+    //         if (response.data && response.data.length > 0) {
+    //             return { success: true, data: response.data };
+    //         } else {
+    //             return {
+    //                 success: false,
+    //                 message: 'No data found for this vehicle number. Please check the number and try again.',
+    //             };
+    //         }
+    //     } catch (error) {
+    //         if (error.code === 'EAI_AGAIN' && attempt < retries) {
+    //             console.log(`Retrying... Attempt ${attempt}/${retries}`);
+    //             await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retrying
+    //         } else if (error.response) {
+    //             return {
+    //                 success: false,
+    //                 message: `Server Error: ${error.response.status} - ${error.response.statusText}.`,
+    //             };
+    //         } else if (error.request) {
+    //             return {
+    //                 success: false,
+    //                 message: 'No response from the API. The server might be down or unreachable.',
+    //             };
+    //         } else if (error.code === 'ENOTFOUND') {
+    //             return {
+    //                 success: false,
+    //                 message: 'DNS resolution failed. Please check the API domain or your network settings.',
+    //             };
+    //         } else {
+    //             return { success: false, message: `Unexpected Error: ${error.message}.` };
+    //         }
+    //     }
+    // }
 
     return {
         success: false,
