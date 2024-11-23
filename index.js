@@ -39,6 +39,9 @@ app.post('/webhook', async (req, res) => {
             await sendInteractiveMessage(from, `${text} - Welcome Back`, 'Update');
             userState.step = 2;
         } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
+            console.log(message);
+            console.log(message.interactive);
+            console.log(message.interactive?.button_reply?.id);
             await sendLocationRequest(from);
             userState.step = 3;
         } else if (userState.step === 3 && message.location) {
