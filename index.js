@@ -45,7 +45,18 @@ app.post('/webhook', async (req, res) => {
                 // await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, [{ id: 'update_device', title: 'Update From Device' }, { id: 'update_link', title: 'Update From Link' }]);
                 try {
                     await sendInteractiveMessage(from,
-                        `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`);
+                        `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`,
+                        [
+                            {
+                                type: 'reply',
+                                reply: { id: 'update_device', title: 'Update From Device' }
+                            },
+                            {
+                                type: 'reply',
+                                reply: { id: 'update_link', title: 'Update From Link' }
+                            }
+                        ]
+                    );
                 } catch (error) {
                     console.error('Error sending interactive message:', error);
                 }
@@ -161,7 +172,7 @@ async function fetchVehicle(vehicleNumber, retries = 3) {
 }
 
 // Function to send interactive button messages
-async function sendInteractiveMessage(to, text) {
+async function sendInteractiveMessage(to, text, buttonList) {
     await axios.post(
         WHATSAPP_API_URL,
         {
@@ -172,12 +183,7 @@ async function sendInteractiveMessage(to, text) {
             interactive: {
                 type: 'button',
                 body: { text },
-                action: {
-                    buttons: [
-                        { id: 'update_device', title: 'Update From Device' },
-                        { id: 'update_link', title: 'Update From Link' }
-                    ]
-                },
+                action: { buttons: buttonList },
             },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
