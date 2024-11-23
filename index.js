@@ -21,6 +21,7 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
+    console.log(text);
 
     // Initialize user state if not already
     if (!userStates[from]) {
