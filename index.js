@@ -36,9 +36,9 @@ app.post('/webhook', async (req, res) => {
             userState.step = 1;
         } else if (userState.step === 1) {
             userState.vehicleNumber = text;
-            userState.imei = response.data[0]['deviceid'];
             // imei = response.data[0]['deviceid'];
             var response = await fetchVehicle(text);
+            userState.imei = response.data[0]['deviceid'];
             if (response == []) {
                 await sendInteractiveMessage(from, "Invaild Vehicle Number!!!");
             } else {
