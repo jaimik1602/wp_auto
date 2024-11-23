@@ -21,7 +21,6 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
-    var imei;
     console.log(text);
 
     // Initialize user state if not already
@@ -32,6 +31,7 @@ app.post('/webhook', async (req, res) => {
     const userState = userStates[from];
 
     try {
+        let imei;
         if (userState.step === 0 && text.toLowerCase() == 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
@@ -57,12 +57,14 @@ app.post('/webhook', async (req, res) => {
                 console.log(url);
                 const response = await axios.get(url);
                 if (response.data['msg'] == "success") {
+                    await new Promise(resolve => setTimeout(resolve, 3000));
                     await sendWhatsAppMessage(
                         from,
                         `Complaint submitted successfully.`
                     );
                     delete userStates[from]; // Reset user state after completion
                 } else {
+                    await new Promise(resolve => setTimeout(resolve, 3000));
                     await sendWhatsAppMessage(
                         from,
                         `Complaint submitted unsuccessfully.`
