@@ -36,7 +36,7 @@ app.post('/webhook', async (req, res) => {
             userState.step = 1;
         } else if (userState.step === 1) {
             userState.vehicleNumber = text;
-            await fetchVehicle(text);
+            var response = await fetchVehicle(text);
             await sendInteractiveMessage(from, `${text} - Welcome Back \n Last Update - ${response.data[0]['received_Date']}`, 'Update');
             userState.step = 2;
         } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
