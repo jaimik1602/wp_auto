@@ -36,11 +36,11 @@ app.post('/webhook', async (req, res) => {
             userState.step = 1;
         } else if (userState.step === 1) {
             userState.vehicleNumber = text;
-            var response = await fetchVehicle(text);
-            console.log(response);
-            console.log(response.data[0]);
-            console.log(response.data[0]['agency']);
-            await sendInteractiveMessage(from, `${text} - Welcome Back \n Last Update - ${response.data[0]['received_Date']}`, 'Update');
+            // var response = await fetchVehicle(text);
+            // console.log(response);
+            // console.log(response.data[0]);
+            // console.log(response.data[0]['agency']);
+            await sendInteractiveMessage(from, `${text} - Welcome Back `, 'Update');
             userState.step = 2;
         } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
             // console.log(message);
