@@ -50,20 +50,18 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 3 && message.location) {
             const { latitude, longitude } = message.location;
 
-            const now = new Date();
-            const currentDate = now.toISOString().split('T')[0].replace(/-/g, '');
-            const currentTime = now.toISOString().split('T')[1].replace(/:/g, '').split('.')[0];
+            const url = `https://app.jaimik.com/zplus/api/wp_push.php?vehicleNumber=${vehicleNumber}&lat=${latitude}&long=${longitude}`;
+            const response = await axios.get(url);
 
-            const dataString = `$NRM,WTEX,1.ONTC,NR,01,L,${response.data[0]['deviceid']},${response.data[0]['vehicleregno']},1,${currentDate},${currentTime},${latitude},N,${longitude},E,0.0,229.84,27,0114.04,2.00,0.41,Vodafone,0,1,25.4,4.0,0,C,22,404,05,16c5,895b,16,16c5,8959,15,16c5,8aff,15,16c5,8afe,10,16c5,895a,0000,00,047834,5400.000,0.000,1450.092,()*D4`;
-
-            console.log(dataString);
             await sendMessage(from, 'Submitting your complaint. Please wait...');
 
-            await sendWhatsAppMessage(
-                from,
-                `Thanks for sharing your location! We received:\nLatitude: ${latitude}\nLongitude: ${longitude}`
-            );
-            delete userStates[from]; // Reset user state after completion
+            if (response.data > 0) {
+                await sendWhatsAppMessage(
+                    from,
+                    `Complaint submitted successfully.`
+                );
+                delete userStates[from]; // Reset user state after completion
+            }
         } else {
             await sendWhatsAppMessage(from, 'Sorry, I didn\'t understand that. Please start again by saying "Hi".');
             delete userStates[from]; // Reset user state for invalid input
