@@ -42,6 +42,7 @@ app.post('/webhook', async (req, res) => {
                 await sendInteractiveMessage(from, "Invaild Vehicle Number!!!");
             } else {
                 imei = response.data[0]['deviceid'];
+                console.log(imei);
                 await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, 'Update');
             }
             userState.step = 2;
