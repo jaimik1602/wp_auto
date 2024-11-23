@@ -21,7 +21,7 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
-    let imei;
+    var imei;
     console.log(text);
 
     // Initialize user state if not already
@@ -56,7 +56,7 @@ app.post('/webhook', async (req, res) => {
                 const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
                 console.log(url);
                 const response = await axios.get(url);
-                if (response.data[0]['msg'] == "success") {
+                if (response.data['msg'] == "success") {
                     await sendWhatsAppMessage(
                         from,
                         `Complaint submitted successfully.`
