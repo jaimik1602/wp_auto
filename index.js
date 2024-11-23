@@ -72,42 +72,16 @@ app.post('/webhook', async (req, res) => {
                 await sendWhatsAppMessage(from, 'Invalid Google Maps link. Please try again.');
             }
         } else if (userState.step === 3) {
+            // Handle location sharing (existing flow)
             if (message.location) {
                 const { latitude, longitude } = message.location;
-                await sendWhatsAppMessage(from, 'Submitting your complaint. Please wait...');
-                const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${latitude}&long=${longitude}`;
-                try {
-                    const response = await axios.get(url, { timeout: 7000 }); // 3-second timeout
-                    if (response.data['msg'] === "success") {
-                        await new Promise(resolve => setTimeout(resolve, 3000));
+                userState.latitude = latitude;
+                userState.longitude = longitude;
 
-                        await sendWhatsAppMessage(
-                            from,
-                            `Complaint submitted successfully.`
-                        );
-                        delete userStates[from]; // Reset user state after completion
-                    } else {
-                        await new Promise(resolve => setTimeout(resolve, 3000));
-
-                        await sendWhatsAppMessage(
-                            from,
-                            `Complaint submission unsuccessful.`
-                        );
-                        delete userStates[from];
-                    }
-                } catch (error) {
-                    if (error.code === 'ECONNABORTED') {
-                        // Handle timeout error
-                        console.error('Request timed out:', error.message);
-                        await sendWhatsAppMessage(from, 'The server took too long to respond. Please try again later.');
-                    } else {
-                        // Handle other errors
-                        console.error('Request failed:', error.message);
-                        await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint.');
-                    }
-                }
+                // Proceed with the complaint submission
+                await submitComplaint(from, userState);
+                delete userStates[from]; // Reset state after successful submission
             } else {
-                console.error('Expected location but did not receive any.');
                 await sendWhatsAppMessage(from, 'Please share your location using the attachment icon.');
             }
         } else {
@@ -221,6 +195,22 @@ async function sendLocationRequest(to) {
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
 }
+
+async function submitComplaint(from, userState) {
+    const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}`;
+    try {
+        const response = await axios.get(url, { timeout: 7000 });
+        if (response.data['msg'] === 'success') {
+            await sendWhatsAppMessage(from, 'Complaint submitted successfully.');
+        } else {
+            await sendWhatsAppMessage(from, 'Complaint submission unsuccessful.');
+        }
+    } catch (error) {
+        console.error('Error submitting complaint:', error.message);
+        await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint.');
+    }
+}
+
 
 // Webhook verification endpoint
 app.get('/webhook', (req, res) => {
