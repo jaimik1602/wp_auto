@@ -79,15 +79,16 @@ async function sendWhatsAppMessage(to, text) {
     );
 }
 
-async function fetchVehicle(vehicleNumber, retries = 3) {
+async function fetchVehicle(vehicleNumber) {
     const url = `https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`;
 
     const response = await axios.get(url);
     console.log(`${response} + responce`);
+    return { success: true, data: response.data };
     // for (let attempt = 1; attempt <= retries; attempt++) {
     //     try {
-            
-            
+
+
     //         if (response.data && response.data.length > 0) {
     //             return { success: true, data: response.data };
     //         } else {
@@ -121,10 +122,10 @@ async function fetchVehicle(vehicleNumber, retries = 3) {
     //     }
     // }
 
-    return {
-        success: false,
-        message: 'Failed to fetch vehicle information after multiple attempts.',
-    };
+    // return {
+    //     success: false,
+    //     message: 'Failed to fetch vehicle information after multiple attempts.',
+    // };
 }
 
 // Function to send interactive button messages
