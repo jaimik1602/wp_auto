@@ -51,7 +51,7 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 3 && message.location) {
             const { latitude, longitude } = message.location;
 
-            const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
+            const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
             const response = await axios.get(url);
 
             await sendMessage(from, 'Submitting your complaint. Please wait...');
