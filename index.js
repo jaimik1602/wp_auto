@@ -36,40 +36,75 @@ app.post('/webhook', async (req, res) => {
             userState.step = 1;
         } else if (userState.step === 1) {
             userState.vehicleNumber = text;
-            // imei = response.data[0]['deviceid'];
             var response = await fetchVehicle(text);
             userState.imei = response.data[0]['deviceid'];
-            if (response == []) {
-                await sendInteractiveMessage(from, "Invaild Vehicle Number!!!");
+            if (!response.data || !response.data[0]) {
+                await sendInteractiveMessage(from, 'Vehicle details not found.');
             } else {
                 console.log(userState.imei);
-                await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, 'Update');
+                await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, [{ id: 'update_device', title: 'Update From Device' }, { id: 'update_link', title: 'Update From Link' }]);
             }
             userState.step = 2;
-        } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
-            await sendLocationRequest(from);
-            userState.step = 3;
+        } else if (userState.step === 2) {
+            if (message.interactive?.button_reply?.id === 'update_device') {
+                // Proceed with the "Update From Device" flow
+                await sendLocationRequest(from);
+                userState.step = 3;
+            } else if (message.interactive?.button_reply?.id === 'update_link') {
+                // Ask for a Google Maps link
+                await sendWhatsAppMessage(from, 'Please share your Google Maps link.');
+                userState.step = 4;
+            }
+        } else if (userState.step === 4) {
+            // Handle Google Maps link input
+            const googleMapsRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const match = text.match(googleMapsRegex);
+            if (match) {
+                const latitude = match[1];
+                const longitude = match[2];
+                userState.latitude = latitude;
+                userState.longitude = longitude;
+
+                // Proceed with the complaint submission
+                await submitComplaint(from, userState);
+                delete userStates[from]; // Reset state after successful submission
+            } else {
+                await sendWhatsAppMessage(from, 'Invalid Google Maps link. Please try again.');
+            }
         } else if (userState.step === 3) {
             if (message.location) {
-                await sendWhatsAppMessage(from, 'Submitting your complaint. Please wait...');
                 const { latitude, longitude } = message.location;
+                await sendWhatsAppMessage(from, 'Submitting your complaint. Please wait...');
                 const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${latitude}&long=${longitude}`;
-                console.log(url);
-                const response = await axios.get(url);
-                if (response.data['msg'] == "success") {
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-                    await sendWhatsAppMessage(
-                        from,
-                        `Complaint submitted successfully.`
-                    );
-                    delete userStates[from]; // Reset user state after completion
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-                    await sendWhatsAppMessage(
-                        from,
-                        `Complaint submitted unsuccessfully.`
-                    );
-                    delete userStates[from];
+                try {
+                    const response = await axios.get(url, { timeout: 7000 }); // 3-second timeout
+                    if (response.data['msg'] === "success") {
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+
+                        await sendWhatsAppMessage(
+                            from,
+                            `Complaint submitted successfully.`
+                        );
+                        delete userStates[from]; // Reset user state after completion
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+
+                        await sendWhatsAppMessage(
+                            from,
+                            `Complaint submission unsuccessful.`
+                        );
+                        delete userStates[from];
+                    }
+                } catch (error) {
+                    if (error.code === 'ECONNABORTED') {
+                        // Handle timeout error
+                        console.error('Request timed out:', error.message);
+                        await sendWhatsAppMessage(from, 'The server took too long to respond. Please try again later.');
+                    } else {
+                        // Handle other errors
+                        console.error('Request failed:', error.message);
+                        await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint.');
+                    }
                 }
             } else {
                 console.error('Expected location but did not receive any.');
@@ -156,14 +191,7 @@ async function sendInteractiveMessage(to, text, buttonText) {
             interactive: {
                 type: 'button',
                 body: { text },
-                action: {
-                    buttons: [
-                        {
-                            type: 'reply',
-                            reply: { id: 'update', title: buttonText },
-                        },
-                    ],
-                },
+                action: { buttons: buttonList },
             },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
