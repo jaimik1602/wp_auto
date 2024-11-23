@@ -21,6 +21,7 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
+    var response;
     console.log(text);
 
     // Initialize user state if not already
@@ -36,7 +37,7 @@ app.post('/webhook', async (req, res) => {
             userState.step = 1;
         } else if (userState.step === 1) {
             userState.vehicleNumber = text;
-            var response = await fetchVehicle(text);
+            response = await fetchVehicle(text);
             if (response == []) {
                 await sendInteractiveMessage(from, "Invaild Vehicle Number!!!");
             } else {
