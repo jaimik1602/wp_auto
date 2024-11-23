@@ -21,7 +21,7 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
-    var imei;
+    let imei;
     console.log(text);
 
     // Initialize user state if not already
@@ -48,11 +48,15 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
             await sendLocationRequest(from);
             userState.step = 3;
-        } else if (userState.step === 3 && message.location) {
-            const { latitude, longitude } = message.location;
-
-            const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
-            const response = await axios.get(url);
+        } else if (userState.step === 3) {
+            if (message.location) {
+                const { latitude, longitude } = message.location;
+                const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
+                const response = await axios.get(url);
+            } else {
+                console.error('Expected location but did not receive any.');
+                await sendWhatsAppMessage(from, 'Please share your location using the attachment icon.');
+            }
 
             await sendMessage(from, 'Submitting your complaint. Please wait...');
 
