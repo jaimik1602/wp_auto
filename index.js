@@ -62,6 +62,12 @@ app.post('/webhook', async (req, res) => {
                         `Complaint submitted successfully.`
                     );
                     delete userStates[from]; // Reset user state after completion
+                } else {
+                    await sendWhatsAppMessage(
+                        from,
+                        `Complaint submitted unsuccessfully.`
+                    );
+                    delete userStates[from];
                 }
             } else {
                 console.error('Expected location but did not receive any.');
