@@ -39,8 +39,8 @@ app.post('/webhook', async (req, res) => {
             await sendInteractiveMessage(from, `${text} - Welcome Back`, 'Update');
             userState.step = 2;
         } else if (userState.step === 2 && message.interactive?.button_reply?.id == 'update') {
-            console.log(message);
-            console.log(message.interactive);
+            // console.log(message);
+            // console.log(message.interactive);
             console.log(message.interactive?.button_reply?.id);
             await sendLocationRequest(from);
             userState.step = 3;
@@ -104,36 +104,25 @@ async function sendInteractiveMessage(to, text, buttonText) {
 // Function to request location sharing
 async function sendLocationRequest(to) {
     // Function to request location sharing with an interactive button
-    async function sendLocationRequest(to) {
-        await axios.post(
-            WHATSAPP_API_URL,
-            {
-                messaging_product: 'whatsapp',
-                recipient_type: 'individual',
-                type: 'interactive',
-                to,
-                interactive: {
-                    type: 'button',
-                    body: {
-                        text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
-                    },
-                    action: {
-                        buttons: [
-                            {
-                                type: 'reply',
-                                reply: {
-                                    id: 'share_location',
-                                    title: 'Share Location',
-                                },
-                            },
-                        ],
-                    },
+    await axios.post(
+        WHATSAPP_API_URL,
+        {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            type: 'interactive',
+            to,
+            interactive: {
+                type: 'location_request_message',
+                body: {
+                    text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
                 },
+                action: {
+                    name: 'send_location',
+                }
             },
-            { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
-        );
-    }
-
+        },
+        { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+    );
 }
 
 // Webhook verification endpoint
