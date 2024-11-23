@@ -21,7 +21,7 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
-    var response;
+    var imei;
     console.log(text);
 
     // Initialize user state if not already
@@ -41,6 +41,7 @@ app.post('/webhook', async (req, res) => {
             if (response == []) {
                 await sendInteractiveMessage(from, "Invaild Vehicle Number!!!");
             } else {
+                imei = express.response.data[0]['deviceid'];
                 await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, 'Update');
             }
             userState.step = 2;
@@ -50,7 +51,7 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 3 && message.location) {
             const { latitude, longitude } = message.location;
 
-            const url = `https://app.jaimik.com/zplus/api/wp_push.php?vehicleNumber=${vehicleNumber}&lat=${latitude}&long=${longitude}`;
+            const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${vehicleNumber}&imei=${imei}&lat=${latitude}&long=${longitude}`;
             const response = await axios.get(url);
 
             await sendMessage(from, 'Submitting your complaint. Please wait...');
@@ -87,7 +88,7 @@ async function sendWhatsAppMessage(to, text) {
 }
 
 async function fetchVehicle(vehicleNumber, retries = 3) {
-    const url = `https://app.jaimik.com/zplus/api/wp_check.php?vehicleNumber=${vehicleNumber}`;
+    const url = `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
