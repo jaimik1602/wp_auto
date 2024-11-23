@@ -85,7 +85,7 @@ async function fetchVehicle(vehicleNumber, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await axios.get(url);
-            console.log(response);
+            console.log(`${response} + responce`);
             if (response.data && response.data.length > 0) {
                 return { success: true, data: response.data };
             } else {
