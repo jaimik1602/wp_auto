@@ -12,14 +12,26 @@ const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 // User sessions to manage chat state
 const userSessions = {};
 
+// Track session timeouts
+const sessionTimeouts = {};
+
 // Helper function to reset user state
 function resetUserState(from) {
+    if (sessionTimeouts[from]) {
+        clearTimeout(sessionTimeouts[from]);
+        delete sessionTimeouts[from];
+    }
     userSessions[from] = {
         step: 0,
         vehicleAttempts: 0,
         locationAttempts: 0,
         sessionStartTime: Date.now(),
     };
+    sessionTimeouts[from] = setTimeout(async () => {
+        delete userSessions[from];
+        delete sessionTimeouts[from];
+        await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
 // Middleware to validate session expiration
