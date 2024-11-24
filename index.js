@@ -66,8 +66,14 @@ app.post('/webhook', async (req, res) => {
                 userState.vehicleNumber = text;
                 userState.imei = response.data[0].deviceid;
                 await sendInteractiveMessage(from, `Vehicle Found - ${text}\nIMEI - ${response.data[0].deviceid}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}`, [
-                    { id: 'update_device', title: 'Update From Device' },
-                    { id: 'update_link', title: 'Update From Link' },
+                    {
+                        type: "reply",
+                        reply: { id: 'update_device', title: 'Update From Device' }
+                    },
+                    {
+                        type: "reply",
+                        reply: { id: 'update_link', title: 'Update From Link' }
+                    },
                 ]);
                 userState.step = 2;
             }
