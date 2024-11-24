@@ -59,7 +59,7 @@ app.post('/webhook', async (req, res) => {
             const vehicleNumber = text;
             const response = await fetchVehicle(vehicleNumber);
 
-            if (!response.success) {
+            if (!response.success || !response.data[0]['deviceid']) {
                 userState.invalidAttempts++;
                 if (userState.invalidAttempts < 3) {
                     await sendWhatsAppMessage(from, `Invalid vehicle number. Please try again. (${userState.invalidAttempts}/3 attempts)`);
@@ -69,8 +69,9 @@ app.post('/webhook', async (req, res) => {
                 }
             } else {
                 userState.vehicleNumber = vehicleNumber;
-                userState.imei = response.data[0]['deviceid'];
-                await sendInteractiveMessage(from,
+                userState.imei = response.data[0]['deviceid']; // Store IMEI
+                await sendInteractiveMessage(
+                    from,
                     `Welcome Back - ${vehicleNumber} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`,
                     [
                         {
@@ -85,7 +86,8 @@ app.post('/webhook', async (req, res) => {
                 );
                 userState.step = 2;
             }
-        } else if (userState.step === 2) {
+        }
+        else if (userState.step === 2) {
             // Handle interactive button response
             const buttonId = message.interactive?.button_reply?.id;
 
