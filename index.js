@@ -80,7 +80,7 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 2) {
             const buttonId = message.interactive?.button_reply?.id;
             if (buttonId === 'update_device') {
-                await sendWhatsAppMessage(from, 'Please share your location using the attachment icon.');
+                await sendLocationRequest(from);
                 userState.step = 3;
             } else if (buttonId === 'update_link') {
                 await sendWhatsAppMessage(from, 'Please forward your driver\'s location in the chat.');
@@ -168,6 +168,30 @@ async function fetchVehicle(vehicleNumber) {
         console.error('Error fetching vehicle details:', error.message);
         return { success: false, message: 'Error fetching vehicle details.' };
     }
+}
+
+// Function to request location sharing
+async function sendLocationRequest(to) {
+    // Function to request location sharing with an interactive button
+    await axios.post(
+        WHATSAPP_API_URL,
+        {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            type: 'interactive',
+            to,
+            interactive: {
+                type: 'location_request_message',
+                body: {
+                    text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
+                },
+                action: {
+                    name: 'send_location',
+                }
+            },
+        },
+        { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+    );
 }
 
 // Function to submit a complaint
