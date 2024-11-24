@@ -74,13 +74,13 @@ app.post('/webhook', async (req, res) => {
                 userState.step = 4;
             }
         } else if (userState.step === 4) {
-            
+
             const result = fetchLatLongFromGoogleMapsUrl(text);
 
             if (result) {
                 userState.latitude = latitude;
                 userState.longitude = longitude;
-
+                console.log(userState.latitude,userState.longitud);
                 // Proceed with the complaint submission
                 await submitComplaint(from, userState);
                 delete userStates[from]; // Reset state after successful submission
