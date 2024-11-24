@@ -227,7 +227,7 @@ async function fetchLatLongFromGoogleMapsUrl(shortUrl) {
 
         // Step 2: Extract coordinates from the URL's query parameters
         const queryString = expandedUrl.split('?')[0];
-        const queryString1 = expandedUrl.split('search/')[1];
+        const queryString1 = queryString.split('search/')[1];
         const queryParams1 = new URLSearchParams(queryString1);
 
         console.log(queryParams1);
