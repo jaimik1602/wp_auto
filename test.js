@@ -7,18 +7,21 @@ async function fetchLatLongFromGoogleMapsUrl(shortUrl) {
             maxRedirects: 0, // Prevent auto-following redirects
             validateStatus: (status) => status >= 300 && status < 400, // Only redirects are valid
         });
-
+        
         const expandedUrl = response.headers.location;
+        console.log(expandedUrl);
+
         if (!expandedUrl) {
             throw new Error('Failed to expand the URL.');
         }
 
         // Step 2: Extract coordinates from the URL's query parameters
         const queryString = expandedUrl.split('?')[0];
-        const queryString1 = expandedUrl.split('search/')[1];
+        console.log(queryString);
+        const queryString1 = queryString.split('maps/')[1];
+        console.log(queryString1);
         const queryParams1 = new URLSearchParams(queryString1);
 
-        console.log(queryParams1);
         const latitude = queryString1.split(',')[0];
         const longitude = queryString1.split('+')[1];
 
@@ -36,7 +39,7 @@ async function fetchLatLongFromGoogleMapsUrl(shortUrl) {
 
 // Example usage
 (async () => {
-    const shortUrl = 'https://maps.app.goo.gl/nm1hBx5LPkj9r1Xm9'; // Short URL
+    const shortUrl = 'https://maps.app.goo.gl/LYdSqGgkrhuzbQXo8'; // Short URL
     const result = await fetchLatLongFromGoogleMapsUrl(shortUrl);
 
     if (result) {

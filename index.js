@@ -6,13 +6,23 @@ require('dotenv').config();
 const app = express();
 app.use(bodyParser.json());
 
-// Replace with your credentials
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v21.0/469434999592396/messages';
 const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 
-// Store user states temporarily
+// Store user states and session tracking
 const userStates = {};
 
+// Helper to check if session has expired
+const isSessionActive = (startTime) => {
+    return Date.now() - startTime <= 5 * 60 * 1000; // 5 minutes
+};
+
+// Reset user state
+const resetUserState = (from) => {
+    delete userStates[from];
+};
+
+// Webhook for incoming messages
 app.post('/webhook', async (req, res) => {
     const messages = req.body.entry[0].changes[0].value.messages;
 
@@ -21,88 +31,88 @@ app.post('/webhook', async (req, res) => {
     const message = messages[0];
     const from = message.from; // User's phone number
     const text = message.text?.body?.trim(); // User's message content
-    console.log(text);
 
-    // Initialize user state if not already
+    console.log(`Message from ${from}: ${text}`);
+
     if (!userStates[from]) {
-        userStates[from] = { step: 0 };
+        // Initialize user state if not already set
+        userStates[from] = { step: 0, invalidAttempts: 0, startTime: Date.now() };
     }
 
     const userState = userStates[from];
 
+    // Check session timeout
+    if (!isSessionActive(userState.startTime)) {
+        await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
+        resetUserState(from);
+        return res.sendStatus(200);
+    }
+
     try {
-        if (userState.step === 0 && text.toLowerCase() == 'hi') {
+        if (userState.step === 0 && text.toLowerCase() === 'hi') {
+            // Start conversation
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
+            userState.startTime = Date.now(); // Reset session start time
         } else if (userState.step === 1) {
-            userState.vehicleNumber = text;
-            var response = await fetchVehicle(text);
-            userState.imei = response.data[0]['deviceid'];
-            if (!response.data || !response.data[0]) {
-                await sendInteractiveMessage(from, 'Vehicle details not found.');
-            } else {
-                console.log(userState.imei);
-                // await sendInteractiveMessage(from, `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`, [{ id: 'update_device', title: 'Update From Device' }, { id: 'update_link', title: 'Update From Link' }]);
-                try {
-                    await sendInteractiveMessage(from,
-                        `Welcome Back - ${text} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`,
-                        [
-                            {
-                                type: 'reply',
-                                reply: { id: 'update_device', title: 'Update From Device' }
-                            },
-                            {
-                                type: 'reply',
-                                reply: { id: 'update_link', title: 'Update From Link' }
-                            }
-                        ]
-                    );
-                } catch (error) {
-                    console.error('Error sending interactive message:', error);
-                }
+            // Vehicle number validation
+            const vehicleNumber = text;
+            const response = await fetchVehicle(vehicleNumber);
 
+            if (!response.success) {
+                userState.invalidAttempts++;
+                if (userState.invalidAttempts < 3) {
+                    await sendWhatsAppMessage(from, `Invalid vehicle number. Please try again. (${userState.invalidAttempts}/3 attempts)`);
+                } else {
+                    await sendWhatsAppMessage(from, "You've exceeded the maximum attempts. Send 'Hi' to restart.");
+                    resetUserState(from);
+                }
+            } else {
+                userState.vehicleNumber = vehicleNumber;
+                userState.imei = response.data[0]['deviceid'];
+                await sendInteractiveMessage(from,
+                    `Welcome Back - ${vehicleNumber} \nSub Agency - ${response.data[0]['subagency']}\nIMEI - ${response.data[0]['deviceid']}\nLast Update - ${response.data[0]['received_Date']}`,
+                    [
+                        {
+                            type: 'reply',
+                            reply: { id: 'update_device', title: 'Update From Device' }
+                        },
+                        {
+                            type: 'reply',
+                            reply: { id: 'update_link', title: 'Update From Link' }
+                        }
+                    ]
+                );
+                userState.step = 2;
             }
-            userState.step = 2;
         } else if (userState.step === 2) {
-            if (message.interactive?.button_reply?.id === 'update_device') {
-                // Proceed with the "Update From Device" flow
+            // Handle interactive button response
+            const buttonId = message.interactive?.button_reply?.id;
+
+            if (buttonId === 'update_device') {
                 await sendLocationRequest(from);
                 userState.step = 3;
-            } else if (message.interactive?.button_reply?.id === 'update_link') {
-                // Ask for a Google Maps link
-                await sendWhatsAppMessage(from, 'Please share your Google Maps link.');
-                userState.step = 4;
-            }
-        } else if (userState.step === 4) {
-
-            const result = await fetchLatLongFromGoogleMapsUrl(text);
-            console.log(result);
-            if (result) {
-                userState.latitude = latitude;
-                userState.longitude = longitude;
-                console.log(userState.latitude,userState.longitud);
-                // Proceed with the complaint submission
-                await submitComplaint(from, userState);
-                delete userStates[from]; // Reset state after successful submission
-            } else {
-                await sendWhatsAppMessage(from, 'Invalid Google Maps link. Please try again.');
+            } else if (buttonId === 'update_link') {
+                await sendWhatsAppMessage(from, "Forward your driver's location in this chat.");
+                userState.step = 3; // Proceed to wait for location
             }
         } else if (userState.step === 3) {
-            // Handle location sharing (existing flow)
+            // Handle location or response after the "Update Link" button
             if (message.location) {
                 const { latitude, longitude } = message.location;
                 userState.latitude = latitude;
                 userState.longitude = longitude;
 
-                // Proceed with the complaint submission
+                // Proceed with complaint submission
                 await submitComplaint(from, userState);
-                delete userStates[from]; // Reset state after successful submission
+                resetUserState(from);
             } else {
                 await sendWhatsAppMessage(from, 'Please share your location using the attachment icon.');
             }
         } else {
+            // Invalid response or fallback
             await sendWhatsAppMessage(from, 'Sorry, I didn\'t understand that. Please start again by saying "Hi".');
-            delete userStates[from]; // Reset user state for invalid input
+            resetUserState(from);
         }
     } catch (error) {
         console.error('Error:', error);
@@ -110,6 +120,7 @@ app.post('/webhook', async (req, res) => {
 
     res.sendStatus(200);
 });
+
 
 // Function to send plain text messages
 async function sendWhatsAppMessage(to, text) {
@@ -210,40 +221,6 @@ async function sendLocationRequest(to) {
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
-}
-
-async function fetchLatLongFromGoogleMapsUrl(shortUrl) {
-    try {
-        // Step 1: Expand the short URL
-        const response = await axios.get(shortUrl, {
-            maxRedirects: 0, // Prevent auto-following redirects
-            validateStatus: (status) => status >= 300 && status < 400, // Only redirects are valid
-        });
-
-        const expandedUrl = response.headers.location;
-        if (!expandedUrl) {
-            throw new Error('Failed to expand the URL.');
-        }
-
-        // Step 2: Extract coordinates from the URL's query parameters
-        const queryString = expandedUrl.split('?')[0];
-        const queryString1 = queryString.split('search/')[1];
-        const queryParams1 = new URLSearchParams(queryString1);
-
-        console.log(queryParams1);
-        const latitude = queryString1.split(',')[0];
-        const longitude = queryString1.split('+')[1];
-
-        if (latitude && longitude) {
-            return { latitude, longitude };
-        } else {
-            console.log('Latitude and longitude not found in the URL.');
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching coordinates:', error.message);
-        return null;
-    }
 }
 
 async function submitComplaint(from, userState) {
