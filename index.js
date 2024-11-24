@@ -75,7 +75,7 @@ app.post('/webhook', async (req, res) => {
             }
         } else if (userState.step === 4) {
 
-            const result = fetchLatLongFromGoogleMapsUrl(text);
+            const result = await fetchLatLongFromGoogleMapsUrl(text);
             console.log(result);
             if (result) {
                 userState.latitude = latitude;
