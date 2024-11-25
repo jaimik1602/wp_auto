@@ -65,6 +65,7 @@ app.post('/webhook', async (req, res) => {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
+            const formattedVehicleNumber = formatVehicleNumber(text);
             const response = await fetchVehicle(text);
             if (!response.success || !response.data[0]?.deviceid) {
                 userState.vehicleAttempts += 1;
@@ -146,6 +147,11 @@ async function sendWhatsAppMessage(to, text) {
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
 }
+
+function formatVehicleNumber(vehicleNumber) {
+    return vehicleNumber.replace(/\s+/g, '').toUpperCase();
+}
+
 
 // Function to send interactive buttons
 async function sendInteractiveMessage(to, text, buttonList) {
