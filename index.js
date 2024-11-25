@@ -61,13 +61,13 @@ app.post('/webhook', async (req, res) => {
     const userState = userSessions[from];
 
     try {
-        // console.log(text.toLowerCase());
+        console.log(text);
         if (userState.step === 0 && text.toLowerCase() === 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
             const formattedVehicleNumber = formatVehicleNumber(text);
-            console.log(formatVehicleNumber);
+            console.log(formattedVehicleNumber);
             const response = await fetchVehicle(formattedVehicleNumber);
             if (!response.success || !response.data[0]?.deviceid) {
                 userState.vehicleAttempts += 1;
