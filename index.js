@@ -61,12 +61,13 @@ app.post('/webhook', async (req, res) => {
     const userState = userSessions[from];
 
     try {
-        console.log(text.toLowerCase());
+        // console.log(text.toLowerCase());
         if (userState.step === 0 && text.toLowerCase() === 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
             const formattedVehicleNumber = formatVehicleNumber(text);
+            console.log(formatVehicleNumber);
             const response = await fetchVehicle(formattedVehicleNumber);
             if (!response.success || !response.data[0]?.deviceid) {
                 userState.vehicleAttempts += 1;
@@ -79,7 +80,7 @@ app.post('/webhook', async (req, res) => {
             } else {
                 userState.vehicleNumber = text;
                 userState.imei = response.data[0].deviceid;
-                await sendInteractiveMessage(from, `Vehicle Found - ${text}\nIMEI - ${response.data[0].deviceid}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}`, [
+                await sendInteractiveMessage(from, `Vehicle Found - ${formattedVehicleNumber}\nIMEI - ${response.data[0].deviceid}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}`, [
                     {
                         type: "reply",
                         reply: { id: 'update_device', title: 'Update From Device' }
