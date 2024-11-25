@@ -35,11 +35,11 @@ function resetUserState(from) {
 }
 
 // Middleware to validate session expiration
-function validateSession(from) {
-    if (!userSessions[from]) return false;
-    const sessionDuration = (Date.now() - userSessions[from].sessionStartTime) / 1000 / 60; // in minutes
-    return sessionDuration <= 5; // Session valid for 5 minutes
-}
+// function validateSession(from) {
+//     if (!userSessions[from]) return false;
+//     const sessionDuration = (Date.now() - userSessions[from].sessionStartTime) / 1000 / 60; // in minutes
+//     return sessionDuration <= 5; // Session valid for 5 minutes
+// }
 
 // Webhook endpoint
 app.post('/webhook', async (req, res) => {
@@ -61,12 +61,13 @@ app.post('/webhook', async (req, res) => {
     const userState = userSessions[from];
 
     try {
+        console.log(text.toLowerCase());
         if (userState.step === 0 && text.toLowerCase() === 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
             userState.step = 1;
         } else if (userState.step === 1) {
             const formattedVehicleNumber = formatVehicleNumber(text);
-            const response = await fetchVehicle(text);
+            const response = await fetchVehicle(formattedVehicleNumber);
             if (!response.success || !response.data[0]?.deviceid) {
                 userState.vehicleAttempts += 1;
                 if (userState.vehicleAttempts >= 3) {
