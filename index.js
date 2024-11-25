@@ -35,11 +35,11 @@ function resetUserState(from) {
 }
 
 // Middleware to validate session expiration
-// function validateSession(from) {
-//     if (!userSessions[from]) return false;
-//     const sessionDuration = (Date.now() - userSessions[from].sessionStartTime) / 1000 / 60; // in minutes
-//     return sessionDuration <= 5; // Session valid for 5 minutes
-// }
+function validateSession(from) {
+    if (!userSessions[from]) return false;
+    const sessionDuration = (Date.now() - userSessions[from].sessionStartTime) / 1000 / 60; // in minutes
+    return sessionDuration <= 5; // Session valid for 5 minutes
+}
 
 // Webhook endpoint
 app.post('/webhook', async (req, res) => {
@@ -50,11 +50,11 @@ app.post('/webhook', async (req, res) => {
     const from = message.from;
     const text = message.text?.body?.trim();
 
-    if (!validateSession(from)) {
-        resetUserState(from);
-        await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
-        return res.sendStatus(200);
-    }
+    // if (!validateSession(from)) {
+    //     resetUserState(from);
+    //     await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
+    //     return res.sendStatus(200);
+    // }
 
     if (!userSessions[from]) resetUserState(from);
 
