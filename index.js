@@ -78,7 +78,7 @@ app.post('/webhook', async (req, res) => {
                     await sendWhatsAppMessage(from, `Vehicle details not found. Attempts left: ${3 - userState.vehicleAttempts}.`);
                 }
             } else {
-                userState.vehicleNumber = text;
+                userState.vehicleNumber = formattedVehicleNumber;
                 userState.imei = response.data[0].deviceid;
                 await sendInteractiveMessage(from, `Vehicle Found - ${formattedVehicleNumber}\nIMEI - ${response.data[0].deviceid}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}`, [
                     {
