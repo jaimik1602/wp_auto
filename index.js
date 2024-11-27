@@ -230,7 +230,7 @@ function formatVehicleNumber(vehicleNumber) {
 async function fetchVehicle(vehicleNumber) {
     try {
         const res = await axios.get(`https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`);
-        return { success: true, data: response.data };
+        return { success: true, data: res.data };
     } catch (error) {
         return { success: false, message: 'No data found for this vehicle number.' };
     }
