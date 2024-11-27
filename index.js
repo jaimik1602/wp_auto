@@ -34,13 +34,6 @@ function resetUserState(from) {
     }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
-// Middleware to validate session expiration
-function validateSession(from) {
-    if (!userSessions[from]) return false;
-    const sessionDuration = (Date.now() - userSessions[from].sessionStartTime) / 1000 / 60; // in minutes
-    return sessionDuration <= 5; // Session valid for 5 minutes
-}
-
 // Webhook endpoint
 app.post('/webhook', async (req, res) => {
     console.log(req.body.entry[0].changes[0].value.messages);
@@ -141,12 +134,19 @@ app.post('/webhook', async (req, res) => {
 
 // Function to send WhatsApp messages in different languages
 async function sendWhatsAppMessage(to, text, language) {
+    const languages = {
+        en: 'en_US',
+        hi: 'hi_IN',
+        gu: 'gu_IN'
+    };
+    const selectedLanguage = languages[language] || 'en_US'; 
     await axios.post(
         WHATSAPP_API_URL,
         {
             messaging_product: 'whatsapp',
             to,
             text: { body: text },
+            language: { code: selectedLanguage },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
@@ -185,17 +185,6 @@ async function sendInteractiveMessage(to, vehicleDetails) {
                             { type: "text", text: serverTime || "N/A" }
                         ]
                     },
-                    {
-                        type: "button",
-                        sub_type: "quick_reply",
-                        index: "0",
-                        parameters: [
-                            {
-                                type: "text",
-                                text: "Update"
-                            }
-                        ]
-                    }
                 ]
             }
         },
@@ -209,29 +198,23 @@ async function sendInteractiveMessage(to, vehicleDetails) {
 
 // Function to request location
 async function sendLocationRequest(to) {
+    // Function to request location sharing with an interactive button
     await axios.post(
         WHATSAPP_API_URL,
         {
             messaging_product: 'whatsapp',
-            to,
+            recipient_type: 'individual',
             type: 'interactive',
+            to,
             interactive: {
-                type: 'button',
+                type: 'location_request_message',
                 body: {
-                    text: 'Please share your location to continue.',
+                    text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
                 },
                 action: {
-                    buttons: [
-                        {
-                            type: 'reply',
-                            reply: {
-                                id: 'location',
-                                title: 'Share Location',
-                            }
-                        }
-                    ]
+                    name: 'send_location',
                 }
-            }
+            },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
@@ -246,26 +229,27 @@ function formatVehicleNumber(vehicleNumber) {
 // Function to fetch vehicle details from API
 async function fetchVehicle(vehicleNumber) {
     try {
-        const res = await axios.get(`https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`);
-        return res.data;
+        const res = await axios.get(`https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`);
+        return { success: true, data: response.data };
     } catch (error) {
-        return { success: false };
+        return { success: false, message: 'No data found for this vehicle number.' };
     }
 }
 
 // Submit complaint to another API
 async function submitComplaint(from, userState) {
-    const complaintData = {
-        vehicleNumber: userState.vehicleNumber,
-        imei: userState.imei,
-        latitude: userState.latitude,
-        longitude: userState.longitude,
-    };
+    const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}`;
     try {
-        const response = await axios.post('https://api.com/submitComplaint', complaintData);
-        await sendWhatsAppMessage(from, 'Your complaint has been submitted successfully.', 'en');
-        await sendWhatsAppMessage(from, 'आपकी शिकायत सफलतापूर्वक दर्ज की गई है।', 'hi');
-        await sendWhatsAppMessage(from, 'તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.', 'gu');
+        const response = await axios.get(url);
+        if (response.data?.msg === 'success') {
+            await sendWhatsAppMessage(from, 'Your complaint has been submitted successfully.', 'en');
+            await sendWhatsAppMessage(from, 'आपकी शिकायत सफलतापूर्वक दर्ज की गई है।', 'hi');
+            await sendWhatsAppMessage(from, 'તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.', 'gu');
+        } else {
+            await sendWhatsAppMessage(from, 'Your complaint submission failed. Please try again later.', 'en');
+            await sendWhatsAppMessage(from, 'आपकी शिकायत सबमिट नहीं की गई। कृपया बाद में पुनः प्रयास करें।', 'hi');
+            await sendWhatsAppMessage(from, 'તમારી ફરિયાદ સબમિશન નિષ્ફળ. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.', 'gu');
+        }
     } catch (error) {
         console.error('Complaint submission error:', error);
         await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint. Please try again later.', 'en');
@@ -273,6 +257,19 @@ async function submitComplaint(from, userState) {
         await sendWhatsAppMessage(from, 'તમારી ફરિયાદ નોંધતી વખતે ભૂલ થઈ છે. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.', 'gu');
     }
 }
+
+// Webhook verification
+app.get('/webhook', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+        res.status(200).send(challenge);
+    } else {
+        res.sendStatus(403);
+    }
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
