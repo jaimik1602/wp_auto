@@ -80,7 +80,7 @@ app.post('/webhook', async (req, res) => {
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
                 userState.imei = response.data[0].deviceid;
-                await sendInteractiveMessage(from, [formattedVehicleNumber, response.data[0].deviceid, response.data[0].agency, response.data[0].subagency, response.data[0].received_Date, response.data[0].servertime]);
+                await sendInteractiveMessage(from, reply[formattedVehicleNumber, response.data[0].deviceid, response.data[0].agency, response.data[0].subagency, response.data[0].received_Date, response.data[0].servertime]);
                 userState.step = 2;
             }
         } else if (userState.step === 2) {
@@ -163,7 +163,7 @@ async function sendInteractiveMessage(to, text, buttonList) {
                         parameters: [
                             {
                                 type: "text",
-                                text: formattedVehicleNumber
+                                text: reply[0]
                             },
                             {
                                 type: "text",
