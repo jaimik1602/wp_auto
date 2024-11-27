@@ -30,7 +30,7 @@ function resetUserState(from) {
     sessionTimeouts[from] = setTimeout(async () => {
         delete userSessions[from];
         delete sessionTimeouts[from];
-        await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
+        await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.", 'en');
     }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
@@ -51,12 +51,6 @@ app.post('/webhook', async (req, res) => {
     const from = message.from;
     const text = message.text?.body?.trim();
 
-    // if (!validateSession(from)) {
-    //     resetUserState(from);
-    //     await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.");
-    //     return res.sendStatus(200);
-    // }
-
     if (!userSessions[from]) resetUserState(from);
 
     const userState = userSessions[from];
@@ -64,7 +58,9 @@ app.post('/webhook', async (req, res) => {
     try {
         console.log(`Sender:- ${from} And Msg:- ${text}`);
         if (userState.step === 0 && typeof text === 'string' && text.toLowerCase() === 'hi') {
-            await sendWhatsAppMessage(from, 'Please enter your vehicle number.');
+            await sendWhatsAppMessage(from, 'Please enter your vehicle number.', 'en');
+            await sendWhatsAppMessage(from, 'कृपया अपनी वाहन संख्या दर्ज करें।', 'hi');
+            await sendWhatsAppMessage(from, 'કૃપયા તમારી વાહન નંબર દાખલ કરો.', 'gu');
             userState.step = 1;
         } else if (userState.step === 1) {
             const formattedVehicleNumber = formatVehicleNumber(text);
@@ -74,9 +70,13 @@ app.post('/webhook', async (req, res) => {
                 userState.vehicleAttempts += 1;
                 if (userState.vehicleAttempts >= 3) {
                     resetUserState(from);
-                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.");
+                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
+                    await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Vehicle details not found. Attempts left: ${3 - userState.vehicleAttempts}.`);
+                    await sendWhatsAppMessage(from, `Wrong Vehicle Number. Attempts left: ${3 - userState.vehicleAttempts}.`, 'en');
+                    await sendWhatsAppMessage(from, `गलत वाहन संख्या। प्रयास बचे हुए: ${3 - userState.vehicleAttempts}.`, 'hi');
+                    await sendWhatsAppMessage(from, `ખોટું વાહન નંબર. પ્રયાસો બાકી: ${3 - userState.vehicleAttempts}.`, 'gu');
                 }
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
@@ -94,9 +94,13 @@ app.post('/webhook', async (req, res) => {
                 userState.locationAttempts += 1;
                 if (userState.locationAttempts >= 3) {
                     resetUserState(from);
-                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.");
+                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
+                    await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Invalid option. Attempts left: ${3 - userState.locationAttempts}.`);
+                    await sendWhatsAppMessage(from, `Invalid option. Attempts left: ${3 - userState.locationAttempts}.`, 'en');
+                    await sendWhatsAppMessage(from, `अमान्य विकल्प। प्रयास बचे हुए: ${3 - userState.locationAttempts}.`, 'hi');
+                    await sendWhatsAppMessage(from, `અમાન્ય વિકલ્પ. પ્રયાસો બાકી: ${3 - userState.locationAttempts}.`, 'gu');
                 }
             }
         } else if (userState.step === 3) {
@@ -110,25 +114,33 @@ app.post('/webhook', async (req, res) => {
                 userState.locationAttempts += 1;
                 if (userState.locationAttempts >= 3) {
                     resetUserState(from);
-                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.");
+                    await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
+                    await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Please share a valid location. Attempts left: ${3 - userState.locationAttempts}.`);
+                    await sendWhatsAppMessage(from, `Please share a valid location. Attempts left: ${3 - userState.locationAttempts}.`, 'en');
+                    await sendWhatsAppMessage(from, `कृपया एक मान्य स्थान साझा करें। प्रयास बचे हुए: ${3 - userState.locationAttempts}.`, 'hi');
+                    await sendWhatsAppMessage(from, `કૃપયા માન્ય સ્થાન શેર કરો. પ્રયાસો બાકી: ${3 - userState.locationAttempts}.`, 'gu');
                 }
             }
         } else {
             resetUserState(from);
-            await sendWhatsAppMessage(from, "Sorry, I didn't understand that. Send 'Hi' to start the conversation.");
+            await sendWhatsAppMessage(from, "Sorry, I didn't understand that. Send 'Hi' to start the conversation.", 'en');
+            await sendWhatsAppMessage(from, "मुझे खेद है, मुझे यह समझ में नहीं आया। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
+            await sendWhatsAppMessage(from, "મને ખેદ છે, મને તે સમજાયું નથી. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
         }
     } catch (error) {
         console.error('Error:', error);
-        await sendWhatsAppMessage(from, 'An error occurred. Please try again.');
+        await sendWhatsAppMessage(from, 'An error occurred. Please try again.', 'en');
+        await sendWhatsAppMessage(from, 'एक त्रुटि हुई। कृपया फिर से प्रयास करें।', 'hi');
+        await sendWhatsAppMessage(from, 'એક ખોટી ઘટના બની. કૃપા કરીને ફરી પ્રયાસ કરો.', 'gu');
     }
 
     res.sendStatus(200);
 });
 
-// Function to send WhatsApp messages
-async function sendWhatsAppMessage(to, text) {
+// Function to send WhatsApp messages in different languages
+async function sendWhatsAppMessage(to, text, language) {
     await axios.post(
         WHATSAPP_API_URL,
         {
@@ -139,11 +151,6 @@ async function sendWhatsAppMessage(to, text) {
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
 }
-
-function formatVehicleNumber(vehicleNumber) {
-    return vehicleNumber.replace(/\s+/g, '').toUpperCase();
-}
-
 
 // Function to send interactive buttons
 async function sendInteractiveMessage(to, vehicleDetails) {
@@ -170,108 +177,102 @@ async function sendInteractiveMessage(to, vehicleDetails) {
                     {
                         type: "body",
                         parameters: [
+                            { type: "text", text: formattedVehicleNumber || "N/A" },
+                            { type: "text", text: deviceId || "N/A" },
+                            { type: "text", text: agency || "N/A" },
+                            { type: "text", text: subAgency || "N/A" },
+                            { type: "text", text: receivedDate || "N/A" },
+                            { type: "text", text: serverTime || "N/A" }
+                        ]
+                    },
+                    {
+                        type: "button",
+                        sub_type: "quick_reply",
+                        index: "0",
+                        parameters: [
                             {
                                 type: "text",
-                                text: formattedVehicleNumber || "N/A"  // Ensure data is available
-                            },
-                            {
-                                type: "text",
-                                text: deviceId || "N/A"
-                            },
-                            {
-                                type: "text",
-                                text: agency || "N/A"
-                            },
-                            {
-                                type: "text",
-                                text: subAgency || "N/A"
-                            },
-                            {
-                                type: "text",
-                                text: receivedDate || "N/A"
-                            },
-                            {
-                                type: "text",
-                                text: serverTime || "N/A"
+                                text: "Update"
                             }
                         ]
                     }
                 ]
             }
         },
-        { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+        {
+            headers: {
+                Authorization: `Bearer ${ACCESS_TOKEN}`,
+            }
+        }
     );
 }
 
-// Function to fetch vehicle details
-async function fetchVehicle(vehicleNumber) {
-    const url = `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`;
-    try {
-        const response = await axios.get(url);
-        if (response.data && response.data.length > 0) {
-            return { success: true, data: response.data };
-        } else {
-            return { success: false, message: 'No data found for this vehicle number.' };
-        }
-    } catch (error) {
-        console.error('Error fetching vehicle details:', error.message);
-        return { success: false, message: 'Error fetching vehicle details.' };
-    }
-}
-
-// Function to request location sharing
+// Function to request location
 async function sendLocationRequest(to) {
-    // Function to request location sharing with an interactive button
     await axios.post(
         WHATSAPP_API_URL,
         {
             messaging_product: 'whatsapp',
-            recipient_type: 'individual',
-            type: 'interactive',
             to,
+            type: 'interactive',
             interactive: {
-                type: 'location_request_message',
+                type: 'button',
                 body: {
-                    text: 'Please share your current location by using the attachment icon in WhatsApp and selecting "Location".',
+                    text: 'Please share your location to continue.',
                 },
                 action: {
-                    name: 'send_location',
+                    buttons: [
+                        {
+                            type: 'reply',
+                            reply: {
+                                id: 'location',
+                                title: 'Share Location',
+                            }
+                        }
+                    ]
                 }
-            },
+            }
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
 }
 
-// Function to submit a complaint
-async function submitComplaint(from, userState) {
-    const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}`;
+// Function to format vehicle number
+function formatVehicleNumber(vehicleNumber) {
+    // Normalize vehicle number formatting here if needed
+    return vehicleNumber.toUpperCase();
+}
+
+// Function to fetch vehicle details from API
+async function fetchVehicle(vehicleNumber) {
     try {
-        const response = await axios.get(url);
-        if (response.data?.msg === 'success') {
-            await sendWhatsAppMessage(from, 'Complaint submitted successfully.');
-        } else {
-            await sendWhatsAppMessage(from, 'Complaint submission unsuccessful.');
-        }
+        const res = await axios.get(`https://vtmscgm.gujarat.gov.in/OpenVehicleStatus/GetOpenVehicleStatus?vehiclenumber=${vehicleNumber}`);
+        return res.data;
     } catch (error) {
-        console.error('Error submitting complaint:', error.message);
-        await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint.');
+        return { success: false };
     }
 }
 
-// Webhook verification
-app.get('/webhook', (req, res) => {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-
-    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
-        res.status(200).send(challenge);
-    } else {
-        res.sendStatus(403);
+// Submit complaint to another API
+async function submitComplaint(from, userState) {
+    const complaintData = {
+        vehicleNumber: userState.vehicleNumber,
+        imei: userState.imei,
+        latitude: userState.latitude,
+        longitude: userState.longitude,
+    };
+    try {
+        const response = await axios.post('https://api.com/submitComplaint', complaintData);
+        await sendWhatsAppMessage(from, 'Your complaint has been submitted successfully.', 'en');
+        await sendWhatsAppMessage(from, 'आपकी शिकायत सफलतापूर्वक दर्ज की गई है।', 'hi');
+        await sendWhatsAppMessage(from, 'તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.', 'gu');
+    } catch (error) {
+        console.error('Complaint submission error:', error);
+        await sendWhatsAppMessage(from, 'An error occurred while submitting your complaint. Please try again later.', 'en');
+        await sendWhatsAppMessage(from, 'आपकी शिकायत दर्ज करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।', 'hi');
+        await sendWhatsAppMessage(from, 'તમારી ફરિયાદ નોંધતી વખતે ભૂલ થઈ છે. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.', 'gu');
     }
-});
+}
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
