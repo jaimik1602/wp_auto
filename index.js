@@ -80,26 +80,19 @@ app.post('/webhook', async (req, res) => {
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
                 userState.imei = response.data[0].deviceid;
-                await sendInteractiveMessage(from, `Vehicle Found - ${formattedVehicleNumber}\nIMEI - ${response.data[0].deviceid}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}`, [
+                await sendInteractiveMessage(from, `Vehicle Number - ${formattedVehicleNumber}\nIMEI - ${response.data[0].deviceid}\nAgency - ${response.data[0].agency}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}\nServer Time - ${response.data[0].servertime}`, [
                     {
                         type: "reply",
-                        reply: { id: 'update_device', title: 'Update From Device' }
-                    },
-                    {
-                        type: "reply",
-                        reply: { id: 'update_link', title: 'Update From Link' }
+                        reply: { id: 'update', title: 'Update' }
                     },
                 ]);
                 userState.step = 2;
             }
         } else if (userState.step === 2) {
             const buttonId = message.interactive?.button_reply?.id;
-            if (buttonId === 'update_device') {
+            if (buttonId === 'update') {
                 await sendLocationRequest(from);
                 userState.step = 3;
-            } else if (buttonId === 'update_link') {
-                await sendWhatsAppMessage(from, 'Please forward your driver\'s location in the chat.');
-                userState.step = 4;
             } else {
                 userState.locationAttempts += 1;
                 if (userState.locationAttempts >= 3) {
