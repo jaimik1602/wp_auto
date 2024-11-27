@@ -85,6 +85,11 @@ app.post('/webhook', async (req, res) => {
                         type: "reply",
                         reply: { id: 'update', title: 'Update' }
                     },
+                    {
+                        type: "url",
+                        url: 'https://google.com',  // The URL to be opened
+                        title: 'Click Here'  // Text shown on the button
+                    },
                 ]);
                 userState.step = 2;
             }
