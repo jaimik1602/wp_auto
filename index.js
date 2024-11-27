@@ -31,6 +31,8 @@ function resetUserState(from) {
         delete userSessions[from];
         delete sessionTimeouts[from];
         await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.", 'en');
+        await sendWhatsAppMessage(from, "आपका सत्र समाप्त हो गया है। बातचीत शुरू करने के लिए 'Hi' भेजें।", 'hi');
+        await sendWhatsAppMessage(from, "તમારું સત્ર સમાપ્ત થઈ ગયું છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.", 'gu');
     }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
@@ -139,7 +141,7 @@ async function sendWhatsAppMessage(to, text, language) {
         hi: 'hi_IN',
         gu: 'gu_IN'
     };
-    const selectedLanguage = languages[language] || 'en_US'; 
+    const selectedLanguage = languages[language] || 'en_US';
     await axios.post(
         WHATSAPP_API_URL,
         {
