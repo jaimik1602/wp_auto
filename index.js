@@ -87,7 +87,7 @@ app.post('/webhook', async (req, res) => {
         } else if (userState.step === 2) {
             const buttonId = message.button?.payload;
             console.log(buttonId);
-            if (buttonId === 'update') {
+            if (buttonId === 'Update') {
                 await sendLocationRequest(from);
                 userState.step = 3;
             } else {
