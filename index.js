@@ -137,11 +137,7 @@ async function sendWhatsAppMessage(to, text) {
         {
             messaging_product: 'whatsapp',
             to,
-            text: [{ body: text },
-            {
-                type: 'FOOTER',
-                text: 'Use the buttons below to manage your marketing subscriptions'
-            },],
+            text: { body: text },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
