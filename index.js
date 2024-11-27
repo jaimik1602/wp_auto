@@ -87,9 +87,9 @@ app.post('/webhook', async (req, res) => {
                     },
                     {
                         type: "url",
-                        url: 'https://google.com',  // The URL to be opened
-                        title: 'Click Here'  // Text shown on the button
-                    },
+                        url: "https://www.example.com",  // Replace with your link
+                        title: "Learn"
+                    }
                 ]);
                 userState.step = 2;
             }
@@ -166,6 +166,9 @@ async function sendInteractiveMessage(to, text, buttonList) {
                 type: 'button',
                 body: { text },
                 action: { buttons: buttonList },
+                footer: {
+                    text: "Jaimik.com"
+                },
             },
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
