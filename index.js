@@ -80,17 +80,7 @@ app.post('/webhook', async (req, res) => {
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
                 userState.imei = response.data[0].deviceid;
-                await sendInteractiveMessage(from, `Vehicle Number - ${formattedVehicleNumber}\nIMEI - ${response.data[0].deviceid}\nAgency - ${response.data[0].agency}\nSub Agency - ${response.data[0].subagency}\nLast Update - ${response.data[0].received_Date}\nServer Time - ${response.data[0].servertime}`, [
-                    {
-                        type: "reply",
-                        reply: { id: 'update', title: 'Update' }
-                    },
-                    {
-                        type: "url",
-                        url: "https://www.example.com",  // Replace with your link
-                        title: "Learn"
-                    }
-                ]);
+                await sendInteractiveMessage(from, [formattedVehicleNumber, response.data[0].deviceid, response.data[0].agency, response.data[0].subagency, response.data[0].received_Date, response.data[0].servertime]);
                 userState.step = 2;
             }
         } else if (userState.step === 2) {
@@ -160,16 +150,45 @@ async function sendInteractiveMessage(to, text, buttonList) {
         {
             messaging_product: 'whatsapp',
             recipient_type: 'individual',
-            type: 'interactive',
+            type: 'template',
             to,
-            interactive: {
-                type: 'button',
-                body: { text },
-                action: { buttons: buttonList },
-                footer: {
-                    text: "Jaimik.com"
+            template: {
+                name: "vehicle_details",
+                language: {
+                    code: "en"
                 },
-            },
+                components: [
+                    {
+                        type: "body",
+                        parameters: [
+                            {
+                                type: "text",
+                                text: formattedVehicleNumber
+                            },
+                            {
+                                type: "text",
+                                text: response.data[0].deviceid
+                            },
+                            {
+                                type: "text",
+                                text: "text-string"
+                            },
+                            {
+                                type: "text",
+                                text: "text-string"
+                            },
+                            {
+                                type: "text",
+                                text: "text-string"
+                            },
+                            {
+                                type: "text",
+                                text: "text-string"
+                            },
+                        ]
+                    }
+                ]
+            }
         },
         { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
     );
