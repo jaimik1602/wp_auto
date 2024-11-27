@@ -80,7 +80,7 @@ app.post('/webhook', async (req, res) => {
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
                 userState.imei = response.data[0].deviceid;
-                await sendInteractiveMessage(from, reply[formattedVehicleNumber, response.data[0].deviceid, response.data[0].agency, response.data[0].subagency, response.data[0].received_Date, response.data[0].servertime]);
+                await sendInteractiveMessage(from, [formattedVehicleNumber, response.data[0].deviceid, response.data[0].agency, response.data[0].subagency, response.data[0].received_Date, response.data[0].servertime]);
                 userState.step = 2;
             }
         } else if (userState.step === 2) {
@@ -144,7 +144,14 @@ function formatVehicleNumber(vehicleNumber) {
 
 
 // Function to send interactive buttons
-async function sendInteractiveMessage(to, text, buttonList) {
+async function sendInteractiveMessage(to, vehicleDetails) {
+    if (vehicleDetails.length < 6) {
+        console.error("Missing vehicle details for template.");
+        return;
+    }
+
+    const [formattedVehicleNumber, deviceId, agency, subAgency, receivedDate, serverTime] = vehicleDetails;
+
     await axios.post(
         WHATSAPP_API_URL,
         {
@@ -153,7 +160,7 @@ async function sendInteractiveMessage(to, text, buttonList) {
             type: 'template',
             to,
             template: {
-                name: "vehicle_details",
+                name: "vehicle_details",  // Ensure this template exists in your WhatsApp API
                 language: {
                     code: "en"
                 },
@@ -163,28 +170,28 @@ async function sendInteractiveMessage(to, text, buttonList) {
                         parameters: [
                             {
                                 type: "text",
-                                text: reply[0]
+                                text: formattedVehicleNumber || "N/A"  // Ensure data is available
                             },
                             {
                                 type: "text",
-                                text: response.data[0].deviceid
+                                text: deviceId || "N/A"
                             },
                             {
                                 type: "text",
-                                text: "text-string"
+                                text: agency || "N/A"
                             },
                             {
                                 type: "text",
-                                text: "text-string"
+                                text: subAgency || "N/A"
                             },
                             {
                                 type: "text",
-                                text: "text-string"
+                                text: receivedDate || "N/A"
                             },
                             {
                                 type: "text",
-                                text: "text-string"
-                            },
+                                text: serverTime || "N/A"
+                            }
                         ]
                     }
                 ]
