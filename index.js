@@ -46,16 +46,6 @@ app.post('/webhook', async (req, res) => {
     const from = message.from;
     const text = message.text?.body?.trim();
 
-    // Reset the state if user sends "Hi" at any point
-    if (text && text.toLowerCase() === 'hi') {
-        resetUserState(from);
-        await sendWhatsAppMessage(from, 'Please enter your vehicle number.', 'en');
-        await sendWhatsAppMessage(from, 'कृपया अपनी वाहन संख्या दर्ज करें।', 'hi');
-        await sendWhatsAppMessage(from, 'કૃપયા તમારો વાહન નંબર દાખલ કરો.', 'gu');
-        return res.sendStatus(200);
-    }
-
-    // If user session doesn't exist, initialize it
     if (!userSessions[from]) resetUserState(from);
 
     const userState = userSessions[from];
@@ -63,7 +53,6 @@ app.post('/webhook', async (req, res) => {
     try {
         console.log(`Sender:- ${from} And Msg:- ${text}`);
         if (userState.step === 0 && typeof text === 'string' && text.toLowerCase() === 'hi') {
-            // This step is redundant as we already handle it at the top
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.', 'en');
             await sendWhatsAppMessage(from, 'कृपया अपनी वाहन संख्या दर्ज करें।', 'hi');
             await sendWhatsAppMessage(from, 'કૃપયા તમારો વાહન નંબર દાખલ કરો.', 'gu');
@@ -78,7 +67,7 @@ app.post('/webhook', async (req, res) => {
                     resetUserState(from);
                     await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી લીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
                     await sendWhatsAppMessage(from, `Enter Correct Vehicle Number!!!`, 'en');
                     await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, 'hi');
@@ -122,7 +111,7 @@ app.post('/webhook', async (req, res) => {
                     resetUserState(from);
                     await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા प्रयત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
                     await sendWhatsAppMessage(from, `Please share a valid location.`, 'en');
                     await sendWhatsAppMessage(from, `कृपया एक मान्य स्थान साझा करें।`, 'hi');
@@ -144,7 +133,6 @@ app.post('/webhook', async (req, res) => {
 
     res.sendStatus(200);
 });
-
 
 // Function to send WhatsApp messages in different languages
 async function sendWhatsAppMessage(to, text, language) {
@@ -236,14 +224,16 @@ async function sendLocationRequest(to) {
 
 // Function to format vehicle number
 function formatVehicleNumber(vehicleNumber) {
-    // Remove spaces and capitalize all characters
-    return vehicleNumber.replace(/\s+/g, '').toUpperCase();
+    // Normalize vehicle number formatting here if needed
+    return vehicleNumber.toUpperCase();
 }
+
 
 // Function to fetch vehicle details from API
 async function fetchVehicle(vehicleNumber) {
     try {
         const res = await axios.get(`https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`);
+        console.log(`https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`);
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, message: 'No data found for this vehicle number.' };
