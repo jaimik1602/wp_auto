@@ -52,6 +52,7 @@ app.post('/webhook', async (req, res) => {
         await sendWhatsAppMessage(from, 'Please enter your vehicle number.', 'en');
         await sendWhatsAppMessage(from, 'कृपया अपनी वाहन संख्या दर्ज करें।', 'hi');
         await sendWhatsAppMessage(from, 'કૃપયા તમારો વાહન નંબર દાખલ કરો.', 'gu');
+        userState.step = 1;
         return res.sendStatus(200);
     }
 
