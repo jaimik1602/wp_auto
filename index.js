@@ -67,7 +67,7 @@ app.post('/webhook', async (req, res) => {
                     resetUserState(from);
                     await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
                     await sendWhatsAppMessage(from, `Enter Correct Vehicle Number!!!`, 'en');
                     await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, 'hi');
@@ -91,11 +91,11 @@ app.post('/webhook', async (req, res) => {
                     resetUserState(from);
                     await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Invalid option. Attempts left: ${3 - userState.locationAttempts}.`, 'en');
-                    await sendWhatsAppMessage(from, `अमान्य विकल्प। प्रयास बचे हुए: ${3 - userState.locationAttempts}.`, 'hi');
-                    await sendWhatsAppMessage(from, `અમાન્ય વિકલ્પ. પ્રયાસો બાકી: ${3 - userState.locationAttempts}.`, 'gu');
+                    await sendWhatsAppMessage(from, `Invalid option.`, 'en');
+                    await sendWhatsAppMessage(from, `अमान्य विकल्प।`, 'hi');
+                    await sendWhatsAppMessage(from, `અમાન્ય વિકલ્પ.`, 'gu');
                 }
             }
         } else if (userState.step === 3) {
@@ -111,18 +111,18 @@ app.post('/webhook', async (req, res) => {
                     resetUserState(from);
                     await sendWhatsAppMessage(from, "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.", 'en');
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+                    await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Please share a valid location. Attempts left: ${3 - userState.locationAttempts}.`, 'en');
-                    await sendWhatsAppMessage(from, `कृपया एक मान्य स्थान साझा करें। प्रयास बचे हुए: ${3 - userState.locationAttempts}.`, 'hi');
-                    await sendWhatsAppMessage(from, `કૃપયા માન્ય સ્થાન શેર કરો. પ્રયાસો બાકી: ${3 - userState.locationAttempts}.`, 'gu');
+                    await sendWhatsAppMessage(from, `Please share a valid location.`, 'en');
+                    await sendWhatsAppMessage(from, `कृपया एक मान्य स्थान साझा करें।`, 'hi');
+                    await sendWhatsAppMessage(from, `કૃપયા માન્ય સ્થાન શેર કરો.`, 'gu');
                 }
             }
         } else {
             resetUserState(from);
             await sendWhatsAppMessage(from, "Sorry, I didn't understand that. Send 'Hi' to start the conversation.", 'en');
             await sendWhatsAppMessage(from, "मुझे खेद है, मुझे यह समझ में नहीं आया। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
-            await sendWhatsAppMessage(from, "મને ખેદ છે, મને તે સમજાયું નથી. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
+            await sendWhatsAppMessage(from, "મને ખેદ છે, મને તે સમજાયું નથી. 'Hi' મોકલીને સંવાદ શરૂ કરો.", 'gu');
         }
     } catch (error) {
         console.error('Error:', error);
