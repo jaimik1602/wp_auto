@@ -32,7 +32,7 @@ function resetUserState(from) {
         delete sessionTimeouts[from];
         await sendWhatsAppMessage(from, "Your session has ended. Send 'Hi' to start the conversation.", 'en');
         await sendWhatsAppMessage(from, "आपका सत्र समाप्त हो गया है। बातचीत शुरू करने के लिए 'Hi' भेजें।", 'hi');
-        await sendWhatsAppMessage(from, "તમારું સત્ર સમાપ્ત થઈ ગયું છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.", 'gu');
+        await sendWhatsAppMessage(from, "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.", 'gu');
     }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
@@ -55,7 +55,7 @@ app.post('/webhook', async (req, res) => {
         if (userState.step === 0 && typeof text === 'string' && text.toLowerCase() === 'hi') {
             await sendWhatsAppMessage(from, 'Please enter your vehicle number.', 'en');
             await sendWhatsAppMessage(from, 'कृपया अपनी वाहन संख्या दर्ज करें।', 'hi');
-            await sendWhatsAppMessage(from, 'કૃપયા તમારી વાહન નંબર દાખલ કરો.', 'gu');
+            await sendWhatsAppMessage(from, 'કૃપયા તમારો વાહન નંબર દાખલ કરો.', 'gu');
             userState.step = 1;
         } else if (userState.step === 1) {
             const formattedVehicleNumber = formatVehicleNumber(text);
@@ -69,9 +69,9 @@ app.post('/webhook', async (req, res) => {
                     await sendWhatsAppMessage(from, "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।", 'hi');
                     await sendWhatsAppMessage(from, "તમે અનુમતિ આપેલા પ્રયત્નો જતિ પાર કરી દીધા છે. 'હાય' મોકલીને સંવાદ શરૂ કરો.", 'gu');
                 } else {
-                    await sendWhatsAppMessage(from, `Wrong Vehicle Number. Attempts left: ${3 - userState.vehicleAttempts}.`, 'en');
-                    await sendWhatsAppMessage(from, `गलत वाहन संख्या। प्रयास बचे हुए: ${3 - userState.vehicleAttempts}.`, 'hi');
-                    await sendWhatsAppMessage(from, `ખોટું વાહન નંબર. પ્રયાસો બાકી: ${3 - userState.vehicleAttempts}.`, 'gu');
+                    await sendWhatsAppMessage(from, `Enter Correct Vehicle Number!!!`, 'en');
+                    await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, 'hi');
+                    await sendWhatsAppMessage(from, `સાચો વાહન નંબર દાખલ કરો!!!`, 'gu');
                 }
             } else {
                 userState.vehicleNumber = formattedVehicleNumber;
