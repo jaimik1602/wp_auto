@@ -128,6 +128,8 @@ app.post("/webhook", async (req, res) => {
       } else {
         userState.vehicleNumber = formattedVehicleNumber;
         userState.imei = response.data[0].deviceid;
+        userState.agency = response.data[0].agency;
+        userState.subagency = response.data[0].subagency;
         await sendInteractiveMessage(from, [
           formattedVehicleNumber,
           response.data[0].deviceid,
@@ -404,7 +406,7 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
 
 // Submit complaint to another API
 async function submitComplaint(from, userState) {
-  const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}`;
+  const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}&agency=${userState.agency}&subagency=${userState.subagency}&number=${phoneNumber}`;
   try {
     const response = await axios.get(url);
     if (response.data?.msg === "success") {
