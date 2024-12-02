@@ -298,6 +298,28 @@ async function checkAndAddVehicleToDB(vehicleNumber, phoneNumber) {
   }
 }
 
+//expiry check
+
+async function expiryCheck(vehicleNumber) {
+  try {
+    // Check if the vehicle number already exists in the database
+    const [rows] = await db.query(
+      "SELECT * FROM expiry_list WHERE vehicle_number = ?",
+      [vehicleNumber]
+    );
+    if (rows.length === 0) {
+      // If vehicle number does not exist, insert it along with the phone number
+      console.log(`Vehicle number is expired.`);
+      return false;
+    } else {
+      console.log(`Vehicle number is not expired`);
+      return true;
+    }
+  } catch (error) {
+    console.error("Error checking vehicle to database:", error);
+  }
+}
+
 // Function to send interactive buttons
 async function sendInteractiveMessage(to, vehicleDetails) {
   if (vehicleDetails.length < 6) {
@@ -392,7 +414,15 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
     if (res.data && res.data[0] && res.data[0].deviceid) {
       // After verifying, check and add to the database
       await checkAndAddVehicleToDB(vehicleNumber, phoneNumber);
-      return { success: true, data: res.data };
+      if (await expiryCheck(vehicleNumber)) {
+        return {
+          success: false,
+          message:
+            "Vehicle Recharge is over!!!\n Contact on this number :- +91 88662 65662",
+        };
+      } else {
+        return { success: true, data: res.data };
+      }
     } else {
       return {
         success: false,
