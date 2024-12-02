@@ -309,7 +309,6 @@ async function checkAndAddVehicleToDB(vehicleNumber, phoneNumber) {
 }
 
 //expiry check
-
 async function expiryCheck(vehicleNumber) {
   try {
     // Check if the vehicle number already exists in the database
