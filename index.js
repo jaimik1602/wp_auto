@@ -98,32 +98,41 @@ app.post("/webhook", async (req, res) => {
       );
       const response = await fetchVehicle(formattedVehicleNumber, phoneNumber);
       if (!response.success || !response.data[0]?.deviceid) {
-        userState.vehicleAttempts += 1;
-        if (userState.vehicleAttempts >= 3) {
+        if (response.message == "expiry") {
           resetUserState(from);
           await sendWhatsAppMessage(
             from,
-            "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.",
+            "Vehicle Recharge is over!!!\n Contact on this number :- +91 88662 65662",
             "en"
-          );
-          await sendWhatsAppMessage(
-            from,
-            "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।",
-            "hi"
-          );
-          await sendWhatsAppMessage(
-            from,
-            "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.",
-            "gu"
           );
         } else {
-          await sendWhatsAppMessage(
-            from,
-            `Enter Correct Vehicle Number!!!`,
-            "en"
-          );
-          await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, "hi");
-          await sendWhatsAppMessage(from, `સાચો વાહન નંબર દાખલ કરો!!!`, "gu");
+          userState.vehicleAttempts += 1;
+          if (userState.vehicleAttempts >= 3) {
+            resetUserState(from);
+            await sendWhatsAppMessage(
+              from,
+              "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.",
+              "en"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।",
+              "hi"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.",
+              "gu"
+            );
+          } else {
+            await sendWhatsAppMessage(
+              from,
+              `Enter Correct Vehicle Number!!!`,
+              "en"
+            );
+            await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, "hi");
+            await sendWhatsAppMessage(from, `સાચો વાહન નંબર દાખલ કરો!!!`, "gu");
+          }
         }
       } else {
         userState.vehicleNumber = formattedVehicleNumber;
@@ -417,8 +426,7 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
       if (await expiryCheck(vehicleNumber)) {
         return {
           success: false,
-          message:
-            "Vehicle Recharge is over!!!\n Contact on this number :- +91 88662 65662",
+          message: "expiry",
         };
       } else {
         return { success: true, data: res.data };
