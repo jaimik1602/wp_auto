@@ -78,7 +78,7 @@ app.post("/webhook", async (req, res) => {
       typeof text === "string" &&
       text.toLowerCase() === "hi"
     ) {
-      resetUserState(from);
+      // resetUserState(from);
       await sendWhatsAppMessage(
         from,
         "Please enter your vehicle number.",
