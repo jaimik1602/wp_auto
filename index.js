@@ -74,10 +74,11 @@ app.post("/webhook", async (req, res) => {
   try {
     console.log(`Sender:- ${from} And Msg:- ${text}`);
     if (
-      userState.step === 0 &&
+      // userState.step === 0 &&
       typeof text === "string" &&
       text.toLowerCase() === "hi"
     ) {
+      resetUserState(from);
       await sendWhatsAppMessage(
         from,
         "Please enter your vehicle number.",
@@ -102,7 +103,7 @@ app.post("/webhook", async (req, res) => {
           resetUserState(from);
           await sendWhatsAppMessage(
             from,
-            "Vehicle Recharge is over!!!\n Contact on this number :- +91 88662 65662",
+            "Vehicle Recharge is over!!!\nContact on this number :- +91 88662 65662",
             "en"
           );
         } else {
