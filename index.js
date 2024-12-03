@@ -106,6 +106,16 @@ app.post("/webhook", async (req, res) => {
             "Vehicle Recharge is over!!!\nContact on this number :- +91 88662 65662",
             "en"
           );
+          await sendWhatsAppMessage(
+            from,
+            "वाहन रिचार्ज ख़त्म!!!\nइस नंबर पर संपर्क करें:- +91 88662 65662",
+            "hi"
+          );
+          await sendWhatsAppMessage(
+            from,
+            "વાહન રિચાર્જ સમાપ્ત થઈ ગયું છે !!!\nઆ નંબર પર સંપર્ક કરો:- +91 88662 65662",
+            "gu"
+          );
         } else {
           userState.vehicleAttempts += 1;
           if (userState.vehicleAttempts >= 3) {
