@@ -406,8 +406,8 @@ async function sendLocationRequest(to) {
 
 // Function to format vehicle number
 function formatVehicleNumber(vehicleNumber) {
-  // Normalize vehicle number formatting here if needed
-  return vehicleNumber.toUpperCase();
+  // Remove spaces and normalize vehicle number formatting
+  return vehicleNumber.replace(/\s+/g, "").toUpperCase();
 }
 
 // Function to fetch vehicle details from API
