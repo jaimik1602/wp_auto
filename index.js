@@ -435,7 +435,7 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
       await checkAndAddVehicleToDB(vehicleNumber, phoneNumber);
       if (await expiryCheck(vehicleNumber)) {
         return {
-          success: false,
+          success: ture,//need
           message: "expiry",
         };
       } else {
@@ -443,7 +443,7 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
       }
     } else {
       return {
-        success: false,
+        success: false,//need+
         message: "No data found for this vehicle number.",
       };
     }
