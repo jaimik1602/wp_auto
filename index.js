@@ -99,52 +99,52 @@ app.post("/webhook", async (req, res) => {
       );
       const response = await fetchVehicle(formattedVehicleNumber, phoneNumber);
       if (!response.success || !response.data[0]?.deviceid) {
-        if (response.message == "expiry") {
+        // if (response.message == "expiry") {
+        //   resetUserState(from);
+        //   await sendWhatsAppMessage(
+        //     from,
+        //     "Vehicle Recharge is over!!!\nContact on this number :- +91 88662 65662",
+        //     "en"
+        //   );
+        //   await sendWhatsAppMessage(
+        //     from,
+        //     "वाहन रिचार्ज ख़त्म!!!\nइस नंबर पर संपर्क करें:- +91 88662 65662",
+        //     "hi"
+        //   );
+        //   await sendWhatsAppMessage(
+        //     from,
+        //     "વાહન રિચાર્જ સમાપ્ત થઈ ગયું છે !!!\nઆ નંબર પર સંપર્ક કરો:- +91 88662 65662",
+        //     "gu"
+        //   );
+        // } else {
+        userState.vehicleAttempts += 1;
+        if (userState.vehicleAttempts >= 3) {
           resetUserState(from);
           await sendWhatsAppMessage(
             from,
-            "Vehicle Recharge is over!!!\nContact on this number :- +91 88662 65662",
+            "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.",
             "en"
           );
           await sendWhatsAppMessage(
             from,
-            "वाहन रिचार्ज ख़त्म!!!\nइस नंबर पर संपर्क करें:- +91 88662 65662",
+            "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।",
             "hi"
           );
           await sendWhatsAppMessage(
             from,
-            "વાહન રિચાર્જ સમાપ્ત થઈ ગયું છે !!!\nઆ નંબર પર સંપર્ક કરો:- +91 88662 65662",
+            "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.",
             "gu"
           );
         } else {
-          userState.vehicleAttempts += 1;
-          if (userState.vehicleAttempts >= 3) {
-            resetUserState(from);
-            await sendWhatsAppMessage(
-              from,
-              "You have exceeded the allowed attempts. Send 'Hi' to start the conversation.",
-              "en"
-            );
-            await sendWhatsAppMessage(
-              from,
-              "आपने अनुमत प्रयासों को पार कर लिया है। 'Hi' भेजकर बातचीत शुरू करें।",
-              "hi"
-            );
-            await sendWhatsAppMessage(
-              from,
-              "તમે અનુમતિ આપેલા પ્રયત્નો પાર કરી દીધા છે. 'Hi' મોકલીને સંવાદ શરૂ કરો.",
-              "gu"
-            );
-          } else {
-            await sendWhatsAppMessage(
-              from,
-              `Enter Correct Vehicle Number!!!`,
-              "en"
-            );
-            await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, "hi");
-            await sendWhatsAppMessage(from, `સાચો વાહન નંબર દાખલ કરો!!!`, "gu");
-          }
+          await sendWhatsAppMessage(
+            from,
+            `Enter Correct Vehicle Number!!!`,
+            "en"
+          );
+          await sendWhatsAppMessage(from, `सही वाहन नंबर दालीये!!!`, "hi");
+          await sendWhatsAppMessage(from, `સાચો વાહન નંબર દાખલ કરો!!!`, "gu");
         }
+        // }
       } else {
         userState.vehicleNumber = formattedVehicleNumber;
         userState.imei = response.data[0].deviceid;
