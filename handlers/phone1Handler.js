@@ -58,14 +58,13 @@ function resetUserState(from) {
 }
 
 exports.handleMessage = async (req, res) => {
-  console.log("Handling message for Phone 1:", message.text.body);
-
   console.log(JSON.stringify(req.body, null, 2));
   // console.log(req.body.entry[0].changes[0].value.messages);
   const messages = req.body.entry[0].changes[0].value.messages;
   if (!messages || messages.length === 0) return res.sendStatus(200);
 
   const message = messages[0];
+  console.log("Handling message for Phone 1:", message.text.body);
   const from = message.from;
   const text = message.text?.body?.trim();
 
