@@ -270,7 +270,7 @@ exports.handleMessage = async (req, res) => {
     );
   }
 
-  res.sendStatus(200);
+//   res.sendStatus(200);
 };
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
