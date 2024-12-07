@@ -92,6 +92,7 @@ exports.handleMessage = async (req, res) => {
       );
       await sendWhatsAppMessage(from, "કૃપયા તમારો વાહન નંબર દાખલ કરો.", "gu");
       userState.step = 1;
+      console.log(userState.step);
     } else if (userState.step === 1) {
       const formattedVehicleNumber = formatVehicleNumber(text);
       const phoneNumber = from; // Assuming 'from' contains the user's mobile number
