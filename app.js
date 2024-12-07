@@ -26,7 +26,7 @@ app.post("/webhook", (req, res) => {
         // Route to the appropriate handler based on phone_number_id
         switch (phoneNumberId) {
           case PHONE_NUMBER_1:
-            phone1Handler.handleMessage(message);
+            phone1Handler.handleMessage(message, req, res);
             break;
           case PHONE_NUMBER_2:
             phone2Handler.handleMessage(message);
@@ -40,6 +40,19 @@ app.post("/webhook", (req, res) => {
 
   // Respond to WhatsApp webhook
   res.sendStatus(200);
+});
+
+// Webhook verification
+app.get("/webhook", (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode === "subscribe" && token === process.env.VERIFY_TOKEN) {
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
 });
 
 // Start the server
