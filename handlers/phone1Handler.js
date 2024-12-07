@@ -4,20 +4,20 @@ const axios = require("axios");
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+const WHATSAPP_API_URL =
+  "https://graph.facebook.com/v21.0/469434999592396/messages";
+const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
+
 exports.handleMessage = async (req, res) => {
   const app = express();
   app.use(bodyParser.json());
-
-  const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  });
-
-  const WHATSAPP_API_URL =
-    "https://graph.facebook.com/v21.0/469434999592396/messages";
-  const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 
   // User sessions to manage chat state
   const userSessions = {};
