@@ -59,6 +59,7 @@ function resetUserState(from) {
 
 // Webhook endpoint
 app.post("/webhook", async (req, res) => {
+  console.log(bodyParser.json(res));
   console.log(req.body.entry[0].changes[0].value.messages);
   const messages = req.body.entry[0].changes[0].value.messages;
   if (!messages || messages.length === 0) return res.sendStatus(200);
