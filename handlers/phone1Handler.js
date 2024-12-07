@@ -15,48 +15,49 @@ const WHATSAPP_API_URL =
   "https://graph.facebook.com/v21.0/469434999592396/messages";
 const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 
+// User sessions to manage chat state
+const userSessions = {};
+
+// Track session timeouts
+const sessionTimeouts = {};
+
+// Helper function to reset user state
+function resetUserState(from) {
+  if (sessionTimeouts[from]) {
+    clearTimeout(sessionTimeouts[from]);
+    delete sessionTimeouts[from];
+  }
+  userSessions[from] = {
+    step: 0,
+    vehicleAttempts: 0,
+    locationAttempts: 0,
+    sessionStartTime: Date.now(),
+  };
+  sessionTimeouts[from] = setTimeout(async () => {
+    delete userSessions[from];
+    delete sessionTimeouts[from];
+    await sendWhatsAppMessage(
+      from,
+      "Your session has ended. Send 'Hi' to start the conversation.",
+      "en"
+    );
+    await sendWhatsAppMessage(
+      from,
+      "आपका सत्र समाप्त हो गया है। बातचीत शुरू करने के लिए 'Hi' भेजें।",
+      "hi"
+    );
+    await sendWhatsAppMessage(
+      from,
+      "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
+      "gu"
+    );
+  }, 5 * 60 * 1000); // 5 minutes in milliseconds
+}
+
 exports.handleMessage = async (req, res) => {
   const app = express();
   app.use(bodyParser.json());
 
-  // User sessions to manage chat state
-  const userSessions = {};
-
-  // Track session timeouts
-  const sessionTimeouts = {};
-
-  // Helper function to reset user state
-  function resetUserState(from) {
-    if (sessionTimeouts[from]) {
-      clearTimeout(sessionTimeouts[from]);
-      delete sessionTimeouts[from];
-    }
-    userSessions[from] = {
-      step: 0,
-      vehicleAttempts: 0,
-      locationAttempts: 0,
-      sessionStartTime: Date.now(),
-    };
-    sessionTimeouts[from] = setTimeout(async () => {
-      delete userSessions[from];
-      delete sessionTimeouts[from];
-      await sendWhatsAppMessage(
-        from,
-        "Your session has ended. Send 'Hi' to start the conversation.",
-        "en"
-      );
-      await sendWhatsAppMessage(
-        from,
-        "आपका सत्र समाप्त हो गया है। बातचीत शुरू करने के लिए 'Hi' भेजें।",
-        "hi"
-      );
-      await sendWhatsAppMessage(
-        from,
-        "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
-        "gu"
-      );
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
-  }
   console.log(JSON.stringify(req.body, null, 2));
   // console.log(req.body.entry[0].changes[0].value.messages);
   const messages = req.body.entry[0].changes[0].value.messages;
