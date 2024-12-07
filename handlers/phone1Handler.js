@@ -64,9 +64,10 @@ exports.handleMessage = async (req, res) => {
   if (!messages || messages.length === 0) return res.sendStatus(200);
 
   const message = messages[0];
-  console.log("Handling message for Phone 1:", message.text.body);
   const from = message.from;
   const text = message.text?.body?.trim();
+
+  console.log("Handling message for Phone 1:", text);
 
   if (!userSessions[from]) resetUserState(from);
 
@@ -270,7 +271,7 @@ exports.handleMessage = async (req, res) => {
     );
   }
 
-//   res.sendStatus(200);
+  //   res.sendStatus(200);
 };
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
