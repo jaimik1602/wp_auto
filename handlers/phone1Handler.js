@@ -57,7 +57,7 @@ function resetUserState(from) {
   }, 5 * 60 * 1000); // 5 minutes in milliseconds
 }
 
-exports.handleMessage = async (message, req, res) => {
+exports.handleMessage = async (req, res) => {
   console.log("Handling message for Phone 1:", message.text.body);
 
   console.log(JSON.stringify(req.body, null, 2));

@@ -26,7 +26,7 @@ app.post("/webhook", (req, res) => {
         // Route to the appropriate handler based on phone_number_id
         switch (phoneNumberId) {
           case PHONE_NUMBER_1:
-            phone1Handler.handleMessage(message, req, res);
+            phone1Handler.handleMessage(req, res);
             break;
           case PHONE_NUMBER_2:
             phone2Handler.handleMessage(message);
