@@ -29,7 +29,7 @@ app.post("/webhook", (req, res) => {
             phone1Handler.handleMessage(req, res);
             break;
           case PHONE_NUMBER_2:
-            phone2Handler.handleMessage(message);
+            phone2Handler.handleMessage(req, res, message);
             break;
           default:
             console.log("Unknown phone number ID:", phoneNumberId);

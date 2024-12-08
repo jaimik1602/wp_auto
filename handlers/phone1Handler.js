@@ -155,9 +155,9 @@ exports.handleMessage = async (req, res) => {
         userState.subagency = response.data[0].subagency;
         await sendInteractiveMessage(from, [
           formattedVehicleNumber,
-          response.data[0].deviceid,
-          response.data[0].agency,
-          response.data[0].subagency,
+          response.data[0].lattitude,
+          response.data[0].longitude,
+          response.data[0].speed,
           response.data[0].received_Date,
           response.data[0].servertime,
         ]);
@@ -273,6 +273,7 @@ exports.handleMessage = async (req, res) => {
 
   //   res.sendStatus(200);
 };
+
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
     en: "en_US",
