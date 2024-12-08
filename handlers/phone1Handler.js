@@ -367,9 +367,9 @@ async function sendInteractiveMessage(to, vehicleDetails) {
       text: {
         body: `
           Vehicle Number: ${formattedVehicleNumber || "N/A"}
-          Device ID: ${deviceId || "N/A"}
-          Agency: ${agency || "N/A"}
-          Sub-Agency: ${subAgency || "N/A"}
+          Latitude: ${deviceId || "N/A"}
+          Longitude: ${agency || "N/A"}
+          Speed: ${subAgency || "N/A"}
           Received Date: ${receivedDate || "N/A"}
           Server Time: ${serverTime || "N/A"}
         `,
