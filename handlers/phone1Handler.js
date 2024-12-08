@@ -363,17 +363,17 @@ async function sendInteractiveMessage(to, vehicleDetails) {
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to, // The recipient's phone number
-      type: "text",
-      text: {
-        body: `
-          Vehicle Number: ${formattedVehicleNumber || "N/A"}
-          \nLatitude: ${deviceId || "N/A"}
-          \nLongitude: ${agency || "N/A"}
-          \nSpeed: ${subAgency || "N/A"}
-          \nReceived Date: ${receivedDate || "N/A"}
-          \nServer Time: ${serverTime || "N/A"}
-        `,
-      },
+      type: "interactive",
+      // text: {
+      //   body: `
+      //     Vehicle Number: ${formattedVehicleNumber || "N/A"}
+      //     \nLatitude: ${deviceId || "N/A"}
+      //     \nLongitude: ${agency || "N/A"}
+      //     \nSpeed: ${subAgency || "N/A"}
+      //     \nReceived Date: ${receivedDate || "N/A"}
+      //     \nServer Time: ${serverTime || "N/A"}
+      //   `,
+      // },
       interactive: {
         type: "button",
         header: {
@@ -381,7 +381,14 @@ async function sendInteractiveMessage(to, vehicleDetails) {
           text: "Vehicle Information",
         },
         body: {
-          text: "Click below to update your vehicle details.",
+          text: {
+              body: `Vehicle Number: ${formattedVehicleNumber || "N/A"}
+                \nLatitude: ${deviceId || "N/A"}
+                \nLongitude: ${agency || "N/A"}
+                \nSpeed: ${subAgency || "N/A"}
+                \nReceived Date: ${receivedDate || "N/A"}
+                \nServer Time: ${serverTime || "N/A"}`,
+            },
         },
         footer: {
           text: "Tap to update.",
