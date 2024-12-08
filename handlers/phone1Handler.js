@@ -164,9 +164,9 @@ exports.handleMessage = async (req, res) => {
         userState.step = 2;
       }
     } else if (userState.step === 2) {
-      const buttonId = message.button?.payload;
+      const buttonId = message.interactive.button_reply.id;
       console.log(buttonId);
-      if (buttonId === "Update") {
+      if (buttonId === "update_button") {
         await sendLocationRequest(from);
         userState.step = 3;
       } else {
@@ -362,31 +362,46 @@ async function sendInteractiveMessage(to, vehicleDetails) {
     {
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      type: "template",
-      to,
-      template: {
-        name: "vehicle_details", // Ensure this template exists in your WhatsApp API
-        language: {
-          code: "en",
+      to, // The recipient's phone number
+      type: "text",
+      text: {
+        body: `
+          Vehicle Number: ${formattedVehicleNumber || "N/A"}
+          Device ID: ${deviceId || "N/A"}
+          Agency: ${agency || "N/A"}
+          Sub-Agency: ${subAgency || "N/A"}
+          Received Date: ${receivedDate || "N/A"}
+          Server Time: ${serverTime || "N/A"}
+        `,
+      },
+      interactive: {
+        type: "button",
+        header: {
+          type: "text",
+          text: "Vehicle Information",
         },
-        components: [
-          {
-            type: "body",
-            parameters: [
-              { type: "text", text: formattedVehicleNumber || "N/A" },
-              { type: "text", text: deviceId || "N/A" },
-              { type: "text", text: agency || "N/A" },
-              { type: "text", text: subAgency || "N/A" },
-              { type: "text", text: receivedDate || "N/A" },
-              { type: "text", text: serverTime || "N/A" },
-            ],
-          },
-        ],
+        body: {
+          text: "Click below to update your vehicle details.",
+        },
+        footer: {
+          text: "Tap to update.",
+        },
+        action: {
+          buttons: [
+            {
+              type: "reply",
+              reply: {
+                id: "update_button",
+                title: "Update",
+              },
+            },
+          ],
+        },
       },
     },
     {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${ACCESS_TOKEN}`, // Bearer token for authorization
       },
     }
   );
