@@ -159,7 +159,7 @@ exports.handleMessage = async (req, res) => {
         }
       } else {
         //
-        if (weekCheck(formattedVehicleNumber, phoneNumber, currentWeek)) {
+        if (await weekCheck(formattedVehicleNumber, phoneNumber, currentWeek)) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
           userState.agency = response.data[0].agency;
@@ -334,7 +334,7 @@ const getCurrentWeek = () => {
   return Math.ceil((days + startOfYear.getDay() + 1) / 7);
 };
 
-function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
+async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
   // Step 1: Check if the vehicle is already registered this week
   db.query(
     "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
