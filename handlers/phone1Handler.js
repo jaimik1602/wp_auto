@@ -342,57 +342,46 @@ const getCurrentWeek = () => {
 
 async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
   console.log(vehicleNumber, mobileNumber, currentWeek);
-  // Step 1: Check if the vehicle is already registered this week
-  await db.query(
-    "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
-    [vehicleNumber, mobileNumber, currentWeek],
-    (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send({ message: "Database error." });
-      }
 
-      if (result.length > 0) {
-        // Vehicle is already registered
-        console.log("Already Register");
-        return true;
+  try {
+    // Step 1: Check if the vehicle is already registered this week
+    const [result] = await db.query(
+      "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
+      [vehicleNumber, mobileNumber, currentWeek]
+    );
+
+    if (result.length > 0) {
+      // Vehicle is already registered this week
+      console.log("Already Registered");
+      return true; // Already registered, return true
+    } else {
+      // Step 2: Check how many vehicles the user has registered this week
+      const [countResult] = await db.query(
+        "SELECT COUNT(DISTINCT vehicle_number) AS vehicle_count FROM weekly_data WHERE mobile_number = ? AND week = ?",
+        [mobileNumber, currentWeek]
+      );
+
+      const vehicleCount = countResult[0].vehicle_count;
+
+      if (vehicleCount >= 2) {
+        // User has already registered two vehicles this week
+        console.log("Limit Error");
+        return false; // Limit reached, return false
       } else {
-        // Step 2: Check how many vehicles the user has registered this week
-        db.query(
-          "SELECT COUNT(DISTINCT vehicle_number) AS vehicle_count FROM weekly_data WHERE mobile_number = ? AND week = ?",
-          [mobileNumber, currentWeek],
-          (err, countResult) => {
-            if (err) {
-              console.error(err);
-              return res.status(500).send({ message: "Database error." });
-            }
-
-            const vehicleCount = countResult[0].vehicle_count;
-
-            if (vehicleCount >= 2) {
-              // User has already registered two vehicles
-              console.log("Limit Error");
-              return false;
-            } else if (vehicleCount < 2) {
-              // Step 3: Register the vehicle
-              db.query(
-                "INSERT INTO weekly_data (vehicle_number, mobile_number, week, created_at) VALUES (?, ?, ?, NOW())",
-                [vehicleNumber, mobileNumber, currentWeek],
-                (err, insertResult) => {
-                  if (err) {
-                    console.error(err);
-                    return res.status(500).send({ message: "Database error." });
-                  }
-                  console.log("Vehicle Added!!");
-                  return true;
-                }
-              );
-            }
-          }
+        // Step 3: Register the new vehicle
+        await db.query(
+          "INSERT INTO weekly_data (vehicle_number, mobile_number, week, created_at) VALUES (?, ?, ?, NOW())",
+          [vehicleNumber, mobileNumber, currentWeek]
         );
+
+        console.log("Vehicle Added!!");
+        return true; // Vehicle successfully added, return true
       }
     }
-  );
+  } catch (err) {
+    console.error(err);
+    return { message: "Database error.", error: err }; // Handle any errors
+  }
 }
 
 // Database function to save contact information
