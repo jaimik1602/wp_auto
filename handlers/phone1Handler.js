@@ -65,9 +65,15 @@ exports.handleMessage = async (req, res) => {
 
   const message = messages[0];
   const from = message.from;
+  const name =
+    req.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
+    "Unknown";
   const text = message.text?.body?.trim();
 
   console.log("Handling message for Phone 1:", text);
+
+  // Save the number and WhatsApp name to the database
+  saveContactToDatabase(from, name);
 
   if (!userSessions[from]) resetUserState(from);
 
@@ -273,6 +279,23 @@ exports.handleMessage = async (req, res) => {
 
   //   res.sendStatus(200);
 };
+
+// Database function to save contact information
+function saveContactToDatabase(number, name) {
+  const query = `
+    INSERT INTO users (phone_number, name) 
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE name = VALUES(name)
+  `;
+
+  db.execute(query, [number, name], (err, results) => {
+    if (err) {
+      console.error("Error saving contact to database:", err);
+    } else {
+      console.log(`Saved contact: ${number} - ${name}`);
+    }
+  });
+}
 
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
