@@ -158,8 +158,10 @@ exports.handleMessage = async (req, res) => {
           }
         }
       } else {
+        var userlevel = await checkUserLevel(phoneNumber);
+        console.log(userlevel);
         //user level check
-        if (await checkUserLevel(phoneNumber)) {
+        if (userlevel) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
           userState.agency = response.data[0].agency;
