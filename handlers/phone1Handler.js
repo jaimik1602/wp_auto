@@ -159,7 +159,13 @@ exports.handleMessage = async (req, res) => {
         }
       } else {
         //
-        if (await weekCheck(formattedVehicleNumber, phoneNumber, currentWeek)) {
+        var result = await weekCheck(
+          formattedVehicleNumber,
+          phoneNumber,
+          currentWeek
+        );
+        console.log(result);
+        if (result) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
           userState.agency = response.data[0].agency;
@@ -340,7 +346,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
   await db.query(
     "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
     [vehicleNumber, mobileNumber, currentWeek],
-    async (err, result) => {
+    (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send({ message: "Database error." });
@@ -352,10 +358,10 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
         return true;
       } else {
         // Step 2: Check how many vehicles the user has registered this week
-        await db.query(
+        db.query(
           "SELECT COUNT(DISTINCT vehicle_number) AS vehicle_count FROM weekly_data WHERE mobile_number = ? AND week = ?",
           [mobileNumber, currentWeek],
-          async (err, countResult) => {
+          (err, countResult) => {
             if (err) {
               console.error(err);
               return res.status(500).send({ message: "Database error." });
