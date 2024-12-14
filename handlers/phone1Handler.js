@@ -69,6 +69,7 @@ exports.handleMessage = async (req, res) => {
     req.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
     "Unknown";
   const text = message.text?.body?.trim();
+  const currentWeek = getCurrentWeek();
 
   console.log("Handling message for Phone 1:", text);
 
@@ -106,7 +107,9 @@ exports.handleMessage = async (req, res) => {
       console.log(
         `Vehicle Number: ${formattedVehicleNumber}, Phone Number: ${phoneNumber}`
       );
+
       const response = await fetchVehicle(formattedVehicleNumber, phoneNumber);
+
       if (!response.success || !response.data[0]?.deviceid) {
         if (response.message == "expiry") {
           resetUserState(from);
@@ -155,41 +158,62 @@ exports.handleMessage = async (req, res) => {
           }
         }
       } else {
-        userState.vehicleNumber = formattedVehicleNumber;
-        userState.imei = response.data[0].deviceid;
-        userState.agency = response.data[0].agency;
-        userState.subagency = response.data[0].subagency;
-        // if (
-        //   userState.subagency == "GaneshAtlanta" ||
-        //   userState.subagency == "MARUTI"
-        // ) {
-        //   resetUserState(from);
-        //   await sendWhatsAppMessage(
-        //     from,
-        //     "Subagency is restricted. For better service, please contact 88662 65662 on WhatsApp.",
-        //     "en"
-        //   );
-        //   await sendWhatsAppMessage(
-        //     from,
-        //     "सब एजेंसी प्रतिबंधित है। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
-        //     "hi"
-        //   );
-        //   await sendWhatsAppMessage(
-        //     from,
-        //     "સબએજન્સી પ્રતિબંધિત છે. વધુ સારી સેવા માટે, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
-        //     "gu"
-        //   );
-        // } else {
-        await sendInteractiveMessage(from, [
-          formattedVehicleNumber,
-          response.data[0].lattitude,
-          response.data[0].longitude,
-          response.data[0].speed,
-          response.data[0].received_Date,
-          response.data[0].servertime,
-        ]);
-        userState.step = 2;
-        // }
+        //
+        if (weekCheck(formattedVehicleNumber, phoneNumber, currentWeek)) {
+          userState.vehicleNumber = formattedVehicleNumber;
+          userState.imei = response.data[0].deviceid;
+          userState.agency = response.data[0].agency;
+          userState.subagency = response.data[0].subagency;
+          // if (
+          //   userState.subagency == "GaneshAtlanta" ||
+          //   userState.subagency == "MARUTI"
+          // ) {
+          //   resetUserState(from);
+          //   await sendWhatsAppMessage(
+          //     from,
+          //     "Subagency is restricted. For better service, please contact 88662 65662 on WhatsApp.",
+          //     "en"
+          //   );
+          //   await sendWhatsAppMessage(
+          //     from,
+          //     "सब एजेंसी प्रतिबंधित है। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
+          //     "hi"
+          //   );
+          //   await sendWhatsAppMessage(
+          //     from,
+          //     "સબએજન્સી પ્રતિબંધિત છે. વધુ સારી સેવા માટે, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
+          //     "gu"
+          //   );
+          // } else {
+          await sendInteractiveMessage(from, [
+            formattedVehicleNumber,
+            response.data[0].lattitude,
+            response.data[0].longitude,
+            response.data[0].speed,
+            response.data[0].received_Date,
+            response.data[0].servertime,
+          ]);
+          userState.step = 2;
+          // }
+        } else {
+          resetUserState(from);
+          await sendWhatsAppMessage(
+            from,
+            "You've reached your weekly limit for vehicle complaints, please contact 88662 65662 on WhatsApp.",
+            "en"
+          );
+          await sendWhatsAppMessage(
+            from,
+            "आप वाहन शिकायतों के लिए अपनी साप्ताहिक सीमा तक पहुँच गए हैं। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
+            "hi"
+          );
+          await sendWhatsAppMessage(
+            from,
+            "તમે વાહનની ફરિયાદો માટે તમારી સાપ્તાહિક મર્યાદા સુધી પહોંચી ગયા છો, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
+            "gu"
+          );
+        }
+        //
       }
     } else if (userState.step === 2) {
       const buttonId = message.interactive.button_reply.id;
@@ -301,6 +325,68 @@ exports.handleMessage = async (req, res) => {
 
   //   res.sendStatus(200);
 };
+
+// Utility: Get current week number
+const getCurrentWeek = () => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+  return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+};
+
+function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
+  // Step 1: Check if the vehicle is already registered this week
+  db.query(
+    "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
+    [vehicleNumber, mobileNumber, currentWeek],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send({ message: "Database error." });
+      }
+
+      if (result.length > 0) {
+        // Vehicle is already registered
+        console.log("Already Register");
+        return true;
+      } else {
+        // Step 2: Check how many vehicles the user has registered this week
+        db.query(
+          "SELECT COUNT(DISTINCT vehicle_number) AS vehicle_count FROM weekly_data WHERE mobile_number = ? AND week = ?",
+          [mobileNumber, currentWeek],
+          (err, countResult) => {
+            if (err) {
+              console.error(err);
+              return res.status(500).send({ message: "Database error." });
+            }
+
+            const vehicleCount = countResult[0].vehicle_count;
+
+            if (vehicleCount >= 2) {
+              // User has already registered two vehicles
+              console.log("Limit Error");
+              return false;
+            } else if (vehicleCount < 2) {
+              // Step 3: Register the vehicle
+              db.query(
+                "INSERT INTO weekly_data (vehicle_number, mobile_number, week, created_at) VALUES (?, ?, ?, NOW())",
+                [vehicleNumber, mobileNumber, currentWeek],
+                (err, insertResult) => {
+                  if (err) {
+                    console.error(err);
+                    return res.status(500).send({ message: "Database error." });
+                  }
+                  console.log("Vehicle Added!!");
+                  return true;
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  );
+}
 
 // Database function to save contact information
 function saveContactToDatabase(number, name) {
