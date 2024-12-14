@@ -335,11 +335,12 @@ const getCurrentWeek = () => {
 };
 
 async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
+  console.log(vehicleNumber, mobileNumber, currentWeek);
   // Step 1: Check if the vehicle is already registered this week
-  db.query(
+  await db.query(
     "SELECT * FROM weekly_data WHERE vehicle_number = ? AND mobile_number = ? AND week = ?",
     [vehicleNumber, mobileNumber, currentWeek],
-    (err, result) => {
+    async (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).send({ message: "Database error." });
@@ -351,10 +352,10 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
         return true;
       } else {
         // Step 2: Check how many vehicles the user has registered this week
-        db.query(
+        await db.query(
           "SELECT COUNT(DISTINCT vehicle_number) AS vehicle_count FROM weekly_data WHERE mobile_number = ? AND week = ?",
           [mobileNumber, currentWeek],
-          (err, countResult) => {
+          async (err, countResult) => {
             if (err) {
               console.error(err);
               return res.status(500).send({ message: "Database error." });
