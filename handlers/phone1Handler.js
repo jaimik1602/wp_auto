@@ -158,14 +158,8 @@ exports.handleMessage = async (req, res) => {
           }
         }
       } else {
-        //
-        var result = await weekCheck(
-          formattedVehicleNumber,
-          phoneNumber,
-          currentWeek
-        );
-        console.log(result);
-        if (result) {
+        //user level check
+        if (await checkUserLevel(phoneNumber)) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
           userState.agency = response.data[0].agency;
@@ -202,24 +196,69 @@ exports.handleMessage = async (req, res) => {
           userState.step = 2;
           // }
         } else {
-          resetUserState(from);
-          await sendWhatsAppMessage(
-            from,
-            "You've reached your weekly limit for vehicle complaints, please contact 88662 65662 on WhatsApp.",
-            "en"
+          //
+          var result = await weekCheck(
+            formattedVehicleNumber,
+            phoneNumber,
+            currentWeek
           );
-          await sendWhatsAppMessage(
-            from,
-            "आप वाहन शिकायतों के लिए अपनी साप्ताहिक सीमा तक पहुँच गए हैं। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
-            "hi"
-          );
-          await sendWhatsAppMessage(
-            from,
-            "તમે વાહનની ફરિયાદો માટે તમારી સાપ્તાહિક મર્યાદા સુધી પહોંચી ગયા છો, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
-            "gu"
-          );
+          console.log(result);
+          if (result) {
+            userState.vehicleNumber = formattedVehicleNumber;
+            userState.imei = response.data[0].deviceid;
+            userState.agency = response.data[0].agency;
+            userState.subagency = response.data[0].subagency;
+            // if (
+            //   userState.subagency == "GaneshAtlanta" ||
+            //   userState.subagency == "MARUTI"
+            // ) {
+            //   resetUserState(from);
+            //   await sendWhatsAppMessage(
+            //     from,
+            //     "Subagency is restricted. For better service, please contact 88662 65662 on WhatsApp.",
+            //     "en"
+            //   );
+            //   await sendWhatsAppMessage(
+            //     from,
+            //     "सब एजेंसी प्रतिबंधित है। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
+            //     "hi"
+            //   );
+            //   await sendWhatsAppMessage(
+            //     from,
+            //     "સબએજન્સી પ્રતિબંધિત છે. વધુ સારી સેવા માટે, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
+            //     "gu"
+            //   );
+            // } else {
+            await sendInteractiveMessage(from, [
+              formattedVehicleNumber,
+              response.data[0].lattitude,
+              response.data[0].longitude,
+              response.data[0].speed,
+              response.data[0].received_Date,
+              response.data[0].servertime,
+            ]);
+            userState.step = 2;
+            // }
+          } else {
+            resetUserState(from);
+            await sendWhatsAppMessage(
+              from,
+              "You've reached your weekly limit for vehicle complaints, please contact 88662 65662 on WhatsApp.",
+              "en"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "आप वाहन शिकायतों के लिए अपनी साप्ताहिक सीमा तक पहुँच गए हैं। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
+              "hi"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "તમે વાહનની ફરિયાદો માટે તમારી સાપ્તાહિક મર્યાદા સુધી પહોંચી ગયા છો, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
+              "gu"
+            );
+          }
+          //
         }
-        //
       }
     } else if (userState.step === 2) {
       const buttonId = message.interactive.button_reply.id;
@@ -386,19 +425,58 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
 
 // Database function to save contact information
 function saveContactToDatabase(number, name) {
-  const query = `
-    INSERT INTO users (phone_number, name) 
-    VALUES (?, ?)
-    ON DUPLICATE KEY UPDATE name = VALUES(name)
+  // Query to check if the phone_number and name match
+  const checkQuery = `
+    SELECT * FROM users WHERE phone_number = ? AND name = ?
   `;
 
-  db.execute(query, [number, name], (err, results) => {
+  db.execute(checkQuery, [number, name], (err, results) => {
     if (err) {
-      console.error("Error saving contact to database:", err);
-    } else {
-      console.log(`Saved contact: ${number} - ${name}`);
+      console.error("Error checking contact in database:", err);
+      return;
     }
+
+    // If a matching record is found, do nothing
+    if (results.length > 0) {
+      console.log(`Contact already exists: ${number} - ${name}`);
+      return;
+    }
+
+    // If no matching record, insert or update the contact
+    const query = `
+      INSERT INTO users (phone_number, name) 
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE name = VALUES(name)
+    `;
+
+    db.execute(query, [number, name], (err, results) => {
+      if (err) {
+        console.error("Error saving contact to database:", err);
+      } else {
+        console.log(`Saved or updated contact: ${number} - ${name}`);
+      }
+    });
   });
+}
+
+// Function to check user_level based on mobile number using async/await
+async function checkUserLevel(mobileNumber) {
+  try {
+    const [results] = await db
+      .promise()
+      .execute("SELECT user_level FROM users WHERE phone_number = ?", [
+        mobileNumber,
+      ]);
+
+    if (results.length > 0) {
+      return results[0].user_level === 1; // Returns true if user_level is 1, else false
+    } else {
+      return false; // Returns false if user not found
+    }
+  } catch (err) {
+    console.error("Database error:", err);
+    return false; // Return false in case of an error
+  }
 }
 
 async function sendWhatsAppMessage(to, text, language) {
