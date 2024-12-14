@@ -464,11 +464,10 @@ function saveContactToDatabase(number, name) {
 // Function to check user_level based on mobile number using async/await
 async function checkUserLevel(mobileNumber) {
   try {
-    const [results] = await db
-      .promise()
-      .execute("SELECT user_level FROM users WHERE phone_number = ?", [
-        mobileNumber,
-      ]);
+    const [results] = await db.execute(
+      "SELECT user_level FROM users WHERE phone_number = ?",
+      [mobileNumber]
+    );
 
     if (results.length > 0) {
       return results[0].user_level === 1; // Returns true if user_level is 1, else false
