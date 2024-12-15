@@ -245,17 +245,17 @@ exports.handleMessage = async (req, res) => {
             resetUserState(from);
             await sendWhatsAppMessage(
               from,
-              "You've reached your weekly limit for vehicle complaints, please contact 88662 65662 on WhatsApp.",
+              "You've reached your weekly limit for vehicle complaints, please try another mobile number to register a complaint.",
               "en"
             );
             await sendWhatsAppMessage(
               from,
-              "आप वाहन शिकायतों के लिए अपनी साप्ताहिक सीमा तक पहुँच गए हैं। बेहतर सेवा के लिए कृपया 88662 65662 पर WhatsApp पर संपर्क करें।",
+              "आप वाहन शिकायतों के लिए अपनी साप्ताहिक सीमा तक पहुँच गए हैं, कृपया शिकायत दर्ज करने के लिए कोई अन्य मोबाइल नंबर आज़माएँ।",
               "hi"
             );
             await sendWhatsAppMessage(
               from,
-              "તમે વાહનની ફરિયાદો માટે તમારી સાપ્તાહિક મર્યાદા સુધી પહોંચી ગયા છો, કૃપા કરીને WhatsApp પર 88662 65662 પર સંપર્ક કરો.",
+              "તમે વાહનની ફરિયાદો માટે તમારી સાપ્તાહિક મર્યાદા સુધી પહોંચી ગયા છો, કૃપા કરીને બીજા મોબાઈલ નંબર થી ફરિયાદ દાખલ કરો.",
               "gu"
             );
           }
