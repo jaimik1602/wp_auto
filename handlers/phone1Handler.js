@@ -664,6 +664,7 @@ async function submitComplaint(from, userState) {
   try {
     const response = await axios.get(url);
     if (response.data?.msg === "success") {
+      // Send success messages in multiple languages
       await sendWhatsAppMessage(
         from,
         "Your complaint has been submitted successfully.",
@@ -679,6 +680,54 @@ async function submitComplaint(from, userState) {
         "તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.",
         "gu"
       );
+
+      // Polling to check if latitude and longitude match
+      const pollLatLng = async () => {
+        try {
+          // Fetch updated data from the API
+          const apiResponse = await axios.get(
+            `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`
+          );
+
+          const apiData = apiResponse.data[0]; // Assuming the API returns an array
+
+          // Format API latitude and longitude to six decimal places
+          const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
+          const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
+
+          // Compare with userState latitude and longitude
+          if (
+            userState.latitude === apiLatitude &&
+            userState.longitude === apiLongitude
+          ) {
+            // Send data update success message
+            await sendWhatsAppMessage(
+              from,
+              "Your data has been updated successfully.",
+              "en"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "आपका डेटा सफलतापूर्वक अपडेट हो गया है।",
+              "hi"
+            );
+            await sendWhatsAppMessage(
+              from,
+              "તમારા ડેટા સફળતાપૂર્વક અપડેટ થયા છે.",
+              "gu"
+            );
+          } else {
+            // If not matching, retry after 5 seconds
+            console.log("Lat/Long do not match. Retrying in 5 seconds...");
+            setTimeout(pollLatLng, 5000);
+          }
+        } catch (error) {
+          console.error("Error polling API:", error);
+        }
+      };
+
+      // Start polling
+      pollLatLng();
     } else {
       await sendWhatsAppMessage(
         from,
