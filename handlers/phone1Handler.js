@@ -59,7 +59,6 @@ exports.handleMessage = async (req, res) => {
   app.use(bodyParser.json());
 
   console.log(JSON.stringify(req.body, null, 2));
-  // console.log(req.body.entry[0].changes[0].value.messages);
   const messages = req.body.entry[0].changes[0].value.messages;
   if (!messages || messages.length === 0) return res.sendStatus(200);
 
@@ -74,7 +73,8 @@ exports.handleMessage = async (req, res) => {
   console.log("Handling message for Phone 1:", text);
 
   // Save the number and WhatsApp name to the database
-  saveContactToDatabase(from, name);
+  var temp = await saveContactToDatabase(from, name);
+  console.log(temp);
 
   if (!userSessions[from]) resetUserState(from);
 
@@ -100,7 +100,6 @@ exports.handleMessage = async (req, res) => {
       );
       await sendWhatsAppMessage(from, "કૃપયા તમારો વાહન નંબર દાખલ કરો.", "gu");
       userState.step = 1;
-      console.log(userState.step);
     } else if (userState.step === 1) {
       const formattedVehicleNumber = formatVehicleNumber(text);
       const phoneNumber = from; // Assuming 'from' contains the user's mobile number
@@ -159,7 +158,6 @@ exports.handleMessage = async (req, res) => {
         }
       } else {
         var userlevel = await checkUserLevel(phoneNumber);
-        console.log(userlevel);
         //user level check
         if (userlevel) {
           userState.vehicleNumber = formattedVehicleNumber;
@@ -204,7 +202,6 @@ exports.handleMessage = async (req, res) => {
             phoneNumber,
             currentWeek
           );
-          console.log(result);
           if (result) {
             userState.vehicleNumber = formattedVehicleNumber;
             userState.imei = response.data[0].deviceid;
@@ -382,7 +379,6 @@ const getCurrentWeek = () => {
 };
 
 async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
-  console.log(vehicleNumber, mobileNumber, currentWeek);
 
   try {
     // Step 1: Check if the vehicle is already registered this week
@@ -426,18 +422,13 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
 }
 
 // Database function to save contact information
-function saveContactToDatabase(number, name) {
-  // Query to check if the phone_number and name match
-  console.log("save run!!!");
-  const checkQuery = `
-    SELECT * FROM users WHERE phone_number = ? AND name = ?
-  `;
+async function saveContactToDatabase(number, name) {
+  try {
+    console.log("save run!!!");
 
-  db.execute(checkQuery, [number, name], (err, results) => {
-    if (err) {
-      console.error("Error checking contact in database:", err);
-      return;
-    }
+    // Query to check if the phone_number and name match
+    const checkQuery = `SELECT * FROM users WHERE phone_number = ? AND name = ?`;
+    const [results] = await db.execute(checkQuery, [number, name]);
 
     // If a matching record is found, do nothing
     if (results.length > 0) {
@@ -445,21 +436,17 @@ function saveContactToDatabase(number, name) {
       return;
     }
 
-    // If no matching record, insert or update the contact
+    // Insert or update the contact
     const query = `
       INSERT INTO users (phone_number, name) 
       VALUES (?, ?)
       ON DUPLICATE KEY UPDATE name = VALUES(name)
     `;
-
-    db.execute(query, [number, name], (err, results) => {
-      if (err) {
-        console.error("Error saving contact to database:", err);
-      } else {
-        console.log(`Saved or updated contact: ${number} - ${name}`);
-      }
-    });
-  });
+    await db.execute(query, [number, name]);
+    console.log(`Saved or updated contact: ${number} - ${name}`);
+  } catch (err) {
+    console.error("Error interacting with the database:", err);
+  }
 }
 
 // Function to check user_level based on mobile number using async/await
