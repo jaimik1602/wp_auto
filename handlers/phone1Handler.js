@@ -51,7 +51,7 @@ function resetUserState(from) {
       "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
       "gu"
     );
-  }, 5 * 60 * 1000); // 5 minutes in milliseconds
+  }, 30 * 60 * 1000); // 5 minutes in milliseconds
 }
 
 exports.handleMessage = async (req, res) => {
@@ -681,8 +681,19 @@ async function submitComplaint(from, userState) {
         "gu"
       );
 
-      // Polling to check if latitude and longitude match
+      // Polling function with a timeout limit of 25 minutes
+      const maxTime = 25 * 60 * 1000; // 25 minutes in milliseconds
+      const intervalTime = 60 * 1000; // 1 minute in milliseconds
+      const startTime = Date.now();
+
       const pollLatLng = async () => {
+        const elapsedTime = Date.now() - startTime;
+
+        if (elapsedTime > maxTime) {
+          console.log("Polling stopped after 25 minutes.");
+          return; // Stop polling after 25 minutes
+        }
+
         try {
           // Fetch updated data from the API
           const apiResponse = await axios.get(
@@ -694,7 +705,12 @@ async function submitComplaint(from, userState) {
           // Format API latitude and longitude to six decimal places
           const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
-
+          console.log(
+            apiLatitude,
+            userState.latitude,
+            apiLongitude,
+            userState.longitude
+          );
           // Compare with userState latitude and longitude
           if (
             userState.latitude === apiLatitude &&
@@ -703,26 +719,28 @@ async function submitComplaint(from, userState) {
             // Send data update success message
             await sendWhatsAppMessage(
               from,
-              "Your data has been updated successfully.",
+              `Your data for ${userState.vehicleNumber} has been updated successfully.`,
               "en"
             );
             await sendWhatsAppMessage(
               from,
-              "आपका डेटा सफलतापूर्वक अपडेट हो गया है।",
+              `आपका ${userState.vehicleNumber} का डेटा सफलतापूर्वक अपडेट हो गया है।`,
               "hi"
             );
             await sendWhatsAppMessage(
               from,
-              "તમારા ડેટા સફળતાપૂર્વક અપડેટ થયા છે.",
+              `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયા છે.`,
               "gu"
             );
+            return; // Stop polling after success
           } else {
-            // If not matching, retry after 5 seconds
-            console.log("Lat/Long do not match. Retrying in 5 seconds...");
-            setTimeout(pollLatLng, 5000);
+            // If not matching, retry after 1 minute
+            console.log("Lat/Long do not match. Retrying in 1 minute...");
+            setTimeout(pollLatLng, intervalTime);
           }
         } catch (error) {
           console.error("Error polling API:", error);
+          setTimeout(pollLatLng, intervalTime); // Retry after 1 minute even if there's an error
         }
       };
 
