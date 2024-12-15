@@ -428,6 +428,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
 // Database function to save contact information
 function saveContactToDatabase(number, name) {
   // Query to check if the phone_number and name match
+  console.log("save run!!!");
   const checkQuery = `
     SELECT * FROM users WHERE phone_number = ? AND name = ?
   `;
