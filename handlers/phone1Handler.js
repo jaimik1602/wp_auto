@@ -735,7 +735,9 @@ async function submitComplaint(from, userState) {
             return; // Stop polling after success
           } else {
             // If not matching, retry after 1 minute
-            console.log("Lat/Long do not match. Retrying in 1 minute...");
+            console.log(
+              `Lat/Long do not match for ${userState.vehicleNumber}. Retrying in 1 minute...`
+            );
             setTimeout(pollLatLng, intervalTime);
           }
         } catch (error) {
