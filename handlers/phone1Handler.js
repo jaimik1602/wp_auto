@@ -686,7 +686,7 @@ async function submitComplaint(from, userState) {
         try {
           // Fetch updated data from the API
           const apiResponse = await axios.get(
-            `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`
+            `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${userState.vehicleNumber}`
           );
 
           const apiData = apiResponse.data[0]; // Assuming the API returns an array
