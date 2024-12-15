@@ -293,8 +293,9 @@ exports.handleMessage = async (req, res) => {
     } else if (userState.step === 3) {
       if (message.location) {
         const { latitude, longitude } = message.location;
-        userState.latitude = latitude;
-        userState.longitude = longitude;
+        userState.latitude = parseFloat(latitude).toFixed(6);
+        userState.longitude = parseFloat(longitude).toFixed(6);
+        console.log(userState.latitude, userState.longitude);
         await submitComplaint(from, userState);
         resetUserState(from);
       } else {
@@ -379,7 +380,6 @@ const getCurrentWeek = () => {
 };
 
 async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
-
   try {
     // Step 1: Check if the vehicle is already registered this week
     const [result] = await db.query(
