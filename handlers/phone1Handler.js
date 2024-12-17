@@ -739,6 +739,7 @@ async function submitComplaint(from, userState) {
               );
               setTimeout(pollLatLng, intervalTime);
             } else {
+              await axios.get(url); // Resend data
               // Notify user about new complaint registration
               await sendWhatsAppMessage(
                 from,
@@ -747,15 +748,14 @@ async function submitComplaint(from, userState) {
               );
               await sendWhatsAppMessage(
                 from,
-                `आपका ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 5 मिनट प्रतीक्षा करें।`,
+                `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 5 मिनट प्रतीक्षा करें।`,
                 "hi"
               );
               await sendWhatsAppMessage(
                 from,
-                `તમારા ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયો. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 5 મિનિટ રાહ જુઓ.`,
+                `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 5 મિનિટ રાહ જુઓ.`,
                 "gu"
               );
-              await axios.get(url); // Resend data
               remainingTime = 5 * 60 * 1000; // Reset remaining time for another 5 minutes
               setTimeout(pollLatLng, intervalTime); // Restart polling
             }
