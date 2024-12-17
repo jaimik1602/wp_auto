@@ -100,6 +100,8 @@ exports.handleMessage = async (req, res) => {
       );
       await sendWhatsAppMessage(from, "કૃપયા તમારો વાહન નંબર દાખલ કરો.", "gu");
       userState.step = 1;
+    } else if (typeof text === "string" && text.toLowerCase() == "stop") {
+      resetUserState(from);
     } else if (userState.step === 1) {
       const formattedVehicleNumber = formatVehicleNumber(text);
       const phoneNumber = from; // Assuming 'from' contains the user's mobile number
