@@ -686,7 +686,7 @@ async function submitComplaint(from, userState) {
 
       // Polling function to check lat-long matching and time difference
       const intervalTime = 60 * 1000; // 1 minute in milliseconds
-      let remainingTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+      let remainingTime = 10 * 60 * 1000; // 5 minutes in milliseconds
 
       const pollLatLng = async () => {
         try {
@@ -758,7 +758,7 @@ async function submitComplaint(from, userState) {
                 `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 5 મિનિટ રાહ જુઓ.`,
                 "gu"
               );
-              remainingTime = 5 * 60 * 1000; // Reset remaining time for another 5 minutes
+              remainingTime = 10 * 60 * 1000; // Reset remaining time for another 5 minutes
               setTimeout(pollLatLng, intervalTime); // Restart polling
             }
           }
