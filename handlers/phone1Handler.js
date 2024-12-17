@@ -682,7 +682,7 @@ async function submitComplaint(from, userState) {
         "gu"
       );
 
-      // Polling function to check lat-long matching
+      // Polling function to check lat-long matching and time difference
       const intervalTime = 60 * 1000; // 1 minute in milliseconds
       let remainingTime = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -696,11 +696,21 @@ async function submitComplaint(from, userState) {
           const apiData = apiResponse.data[0]; // Assuming the API returns an array
           const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
+          const receivedDate = new Date(apiData.received_Date);
+          const serverTime = new Date(apiData.servertime);
+          const currentTime = new Date();
 
-          // Compare with userState latitude and longitude
+          // Calculate time differences
+          const timeDiffReceived =
+            Math.abs(currentTime - receivedDate) / 1000 / 60; // in minutes
+          const timeDiffServer = Math.abs(currentTime - serverTime) / 1000 / 60; // in minutes
+
+          // Compare with userState latitude, longitude, and time difference
           if (
             userState.latitude === apiLatitude &&
-            userState.longitude === apiLongitude
+            userState.longitude === apiLongitude &&
+            timeDiffReceived <= 25 &&
+            timeDiffServer <= 25
           ) {
             // Send data update success message
             await sendWhatsAppMessage(
@@ -725,7 +735,7 @@ async function submitComplaint(from, userState) {
             if (remainingTime > 0) {
               // Resend data and continue polling
               console.log(
-                `Lat/Long do not match for ${userState.vehicleNumber}. Resending data and retrying in 1 minute...`
+                `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
               );
               setTimeout(pollLatLng, intervalTime);
             } else {
