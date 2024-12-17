@@ -745,17 +745,17 @@ async function submitComplaint(from, userState) {
               // Notify user about new complaint registration
               await sendWhatsAppMessage(
                 from,
-                `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 5 minutes.`,
+                `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 10 minutes.`,
                 "en"
               );
               await sendWhatsAppMessage(
                 from,
-                `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 5 मिनट प्रतीक्षा करें।`,
+                `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 10 मिनट प्रतीक्षा करें।`,
                 "hi"
               );
               await sendWhatsAppMessage(
                 from,
-                `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 5 મિનિટ રાહ જુઓ.`,
+                `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 10 મિનિટ રાહ જુઓ.`,
                 "gu"
               );
               remainingTime = 10 * 60 * 1000; // Reset remaining time for another 5 minutes
