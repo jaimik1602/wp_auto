@@ -51,7 +51,7 @@ function resetUserState(from) {
       "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
       "gu"
     );
-  }, 30 * 60 * 1000); // 5 minutes in milliseconds
+  }, 23 * 60 * 60 * 1000); // 5 minutes in milliseconds
 }
 
 exports.handleMessage = async (req, res) => {
@@ -661,6 +661,7 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
 // Submit complaint to another API
 async function submitComplaint(from, userState) {
   const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}&agency=${userState.agency}&subagency=${userState.subagency}&number=${from}`;
+
   try {
     const response = await axios.get(url);
     if (response.data?.msg === "success") {
@@ -681,19 +682,11 @@ async function submitComplaint(from, userState) {
         "gu"
       );
 
-      // Polling function with a timeout limit of 25 minutes
-      const maxTime = 25 * 60 * 1000; // 25 minutes in milliseconds
+      // Polling function to check lat-long matching
       const intervalTime = 60 * 1000; // 1 minute in milliseconds
-      const startTime = Date.now();
+      let remainingTime = 5 * 60 * 1000; // 5 minutes in milliseconds
 
       const pollLatLng = async () => {
-        const elapsedTime = Date.now() - startTime;
-
-        if (elapsedTime > maxTime) {
-          console.log("Polling stopped after 25 minutes.");
-          return; // Stop polling after 25 minutes
-        }
-
         try {
           // Fetch updated data from the API
           const apiResponse = await axios.get(
@@ -701,16 +694,9 @@ async function submitComplaint(from, userState) {
           );
 
           const apiData = apiResponse.data[0]; // Assuming the API returns an array
-
-          // Format API latitude and longitude to six decimal places
           const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
-          console.log(
-            apiLatitude,
-            userState.latitude,
-            apiLongitude,
-            userState.longitude
-          );
+
           // Compare with userState latitude and longitude
           if (
             userState.latitude === apiLatitude &&
@@ -729,26 +715,51 @@ async function submitComplaint(from, userState) {
             );
             await sendWhatsAppMessage(
               from,
-              `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયા છે.`,
+              `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયો છે.`,
               "gu"
             );
-            return; // Stop polling after success
+            return; // Stop polling
           } else {
-            // If not matching, retry after 1 minute
-            console.log(
-              `Lat/Long do not match for ${userState.vehicleNumber}. Retrying in 1 minute...`
-            );
-            setTimeout(pollLatLng, intervalTime);
+            remainingTime -= intervalTime;
+
+            if (remainingTime > 0) {
+              // Resend data and continue polling
+              console.log(
+                `Lat/Long do not match for ${userState.vehicleNumber}. Resending data and retrying in 1 minute...`
+              );
+              setTimeout(pollLatLng, intervalTime);
+            } else {
+              // Notify user about new complaint registration
+              await sendWhatsAppMessage(
+                from,
+                `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 5 minutes.`,
+                "en"
+              );
+              await sendWhatsAppMessage(
+                from,
+                `आपका ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 5 मिनट प्रतीक्षा करें।`,
+                "hi"
+              );
+              await sendWhatsAppMessage(
+                from,
+                `તમારા ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયો. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 5 મિનિટ રાહ જુઓ.`,
+                "gu"
+              );
+              await axios.get(url); // Resend data
+              remainingTime = 5 * 60 * 1000; // Reset remaining time for another 5 minutes
+              setTimeout(pollLatLng, intervalTime); // Restart polling
+            }
           }
         } catch (error) {
           console.error("Error polling API:", error);
-          setTimeout(pollLatLng, intervalTime); // Retry after 1 minute even if there's an error
+          setTimeout(pollLatLng, intervalTime); // Retry after 1 minute
         }
       };
 
       // Start polling
       pollLatLng();
     } else {
+      // Send failure messages
       await sendWhatsAppMessage(
         from,
         "Your complaint submission failed. Please try again later.",
@@ -784,5 +795,6 @@ async function submitComplaint(from, userState) {
     );
   }
 }
+
 //   const port = process.env.PORT || 3000;
 //   app.listen(port, () => console.log(`Server running on port ${port}`));
