@@ -708,13 +708,17 @@ async function submitComplaint(from, userState) {
           const receivedDate = parseDate(apiData.received_Date);
           const serverTime = parseDate(apiData.servertime);
           const currentTime = new Date();
+          // Convert to IST
+          const indianTime = currentTime.toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          });
 
           // Calculate time differences
           const timeDiffReceived =
-            Math.abs(currentTime - receivedDate) / 1000 / 60; // in minutes
-          const timeDiffServer = Math.abs(currentTime - serverTime) / 1000 / 60; // in minutes
+            Math.abs(indianTime - receivedDate) / 1000 / 60; // in minutes
+          const timeDiffServer = Math.abs(indianTime - serverTime) / 1000 / 60; // in minutes
           console.log(
-            `recevie time: ${receivedDate}, server time: ${serverTime}, current time ${currentTime}`
+            `recevie time: ${receivedDate}, server time: ${serverTime}, current time ${indianTime}`
           );
           console.log(timeDiffReceived, timeDiffServer);
           console.log(
