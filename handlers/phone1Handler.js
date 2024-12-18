@@ -695,11 +695,18 @@ async function submitComplaint(from, userState) {
             `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${userState.vehicleNumber}`
           );
 
+          const parseDate = (str) => {
+            const [day, month, year, hours, minutes, seconds] = str
+              .split(/[/ :]/)
+              .map(Number);
+            return new Date(year, month - 1, day, hours, minutes, seconds);
+          };
+
           const apiData = apiResponse.data[0]; // Assuming the API returns an array
           const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
-          const receivedDate = new Date(apiData.received_Date);
-          const serverTime = new Date(apiData.servertime);
+          const receivedDate = parseDate(apiData.received_Date);
+          const serverTime = parseDate(apiData.servertime);
           const currentTime = new Date();
 
           // Calculate time differences
@@ -709,7 +716,7 @@ async function submitComplaint(from, userState) {
           console.log(
             `recevie time: ${receivedDate}, server time: ${serverTime}, current time ${currentTime}`
           );
-          console.log(timeDiffReceived);
+          console.log(timeDiffReceived, timeDiffServer);
           console.log(
             `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}`
           );
