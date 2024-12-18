@@ -715,8 +715,9 @@ async function submitComplaint(from, userState) {
 
           // Calculate time differences
           const timeDiffReceived =
-            Math.abs(indianTime - receivedDate) / 1000 / 60; // in minutes
-          const timeDiffServer = Math.abs(indianTime - serverTime) / 1000 / 60; // in minutes
+            Math.abs(indianTime.getTime() - receivedDate.getTime()) / 1000 / 60; // in minutes
+          const timeDiffServer =
+            Math.abs(indianTime.getTime() - serverTime.getTime()) / 1000 / 60; // in minutes
           console.log(
             `recevie time: ${receivedDate}, server time: ${serverTime}, current time ${indianTime}`
           );
