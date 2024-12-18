@@ -60,14 +60,10 @@ exports.handleMessage = async (req, res) => {
     req.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
     "Unknown";
   const text = message.text?.body?.trim();
-  const currentWeek = getCurrentWeek();
 
   console.log("Handling message for Phone 1:", text);
 
   // Save the number and WhatsApp name to the database
-  var temp = await saveContactToDatabase(from, name);
-  console.log(temp);
-
   if (!userSessions[from]) resetUserState(from);
 
   const userState = userSessions[from];
