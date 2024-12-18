@@ -708,6 +708,9 @@ async function submitComplaint(from, userState) {
           const timeDiffServer = Math.abs(currentTime - serverTime) / 1000 / 60; // in minutes
           console.log(timeDiffServer);
           console.log(timeDiffReceived);
+          console.log(
+            `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}`
+          );
 
           // Compare with userState latitude, longitude, and time difference
           if (
