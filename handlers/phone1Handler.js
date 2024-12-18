@@ -51,7 +51,7 @@ function resetUserState(from) {
       "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
       "gu"
     );
-  }, 23 * 60 * 60 * 1000); // 5 minutes in milliseconds
+  }, 10 * 60 * 1000); // 5 minutes in milliseconds
 }
 
 exports.handleMessage = async (req, res) => {
@@ -685,91 +685,91 @@ async function submitComplaint(from, userState) {
       );
 
       // Polling function to check lat-long matching and time difference
-      const intervalTime = 60 * 1000; // 1 minute in milliseconds
-      let remainingTime = 10 * 60 * 1000; // 5 minutes in milliseconds
+      // const intervalTime = 60 * 1000; // 1 minute in milliseconds
+      // let remainingTime = 10 * 60 * 1000; // 5 minutes in milliseconds
 
-      const pollLatLng = async () => {
-        try {
-          // Fetch updated data from the API
-          const apiResponse = await axios.get(
-            `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${userState.vehicleNumber}`
-          );
+      // const pollLatLng = async () => {
+      //   try {
+      //     // Fetch updated data from the API
+      //     const apiResponse = await axios.get(
+      //       `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${userState.vehicleNumber}`
+      //     );
 
-          const apiData = apiResponse.data[0]; // Assuming the API returns an array
-          const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
-          const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
-          const receivedDate = new Date(apiData.received_Date);
-          const serverTime = new Date(apiData.servertime);
-          const currentTime = new Date();
+      //     const apiData = apiResponse.data[0]; // Assuming the API returns an array
+      //     const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
+      //     const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
+      //     const receivedDate = new Date(apiData.received_Date);
+      //     const serverTime = new Date(apiData.servertime);
+      //     const currentTime = new Date();
 
-          // Calculate time differences
-          const timeDiffReceived =
-            Math.abs(currentTime - receivedDate) / 1000 / 60; // in minutes
-          const timeDiffServer = Math.abs(currentTime - serverTime) / 1000 / 60; // in minutes
+      //     // Calculate time differences
+      //     const timeDiffReceived =
+      //       Math.abs(currentTime - receivedDate) / 1000 / 60; // in minutes
+      //     const timeDiffServer = Math.abs(currentTime - serverTime) / 1000 / 60; // in minutes
 
-          // Compare with userState latitude, longitude, and time difference
-          if (
-            userState.latitude === apiLatitude &&
-            userState.longitude === apiLongitude &&
-            timeDiffReceived <= 25 &&
-            timeDiffServer <= 25
-          ) {
-            // Send data update success message
-            await sendWhatsAppMessage(
-              from,
-              `Your data for ${userState.vehicleNumber} has been updated successfully.`,
-              "en"
-            );
-            await sendWhatsAppMessage(
-              from,
-              `आपका ${userState.vehicleNumber} का डेटा सफलतापूर्वक अपडेट हो गया है।`,
-              "hi"
-            );
-            await sendWhatsAppMessage(
-              from,
-              `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયો છે.`,
-              "gu"
-            );
-            return; // Stop polling
-          } else {
-            remainingTime -= intervalTime;
+      //     // Compare with userState latitude, longitude, and time difference
+      //     if (
+      //       userState.latitude === apiLatitude &&
+      //       userState.longitude === apiLongitude &&
+      //       timeDiffReceived <= 25 &&
+      //       timeDiffServer <= 25
+      //     ) {
+      //       // Send data update success message
+      //       await sendWhatsAppMessage(
+      //         from,
+      //         `Your data for ${userState.vehicleNumber} has been updated successfully.`,
+      //         "en"
+      //       );
+      //       await sendWhatsAppMessage(
+      //         from,
+      //         `आपका ${userState.vehicleNumber} का डेटा सफलतापूर्वक अपडेट हो गया है।`,
+      //         "hi"
+      //       );
+      //       await sendWhatsAppMessage(
+      //         from,
+      //         `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયો છે.`,
+      //         "gu"
+      //       );
+      //       return; // Stop polling
+      //     } else {
+      //       remainingTime -= intervalTime;
 
-            if (remainingTime > 0) {
-              // Resend data and continue polling
-              console.log(
-                `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
-              );
-              setTimeout(pollLatLng, intervalTime);
-            } else {
-              await axios.get(url); // Resend data
-              // Notify user about new complaint registration
-              await sendWhatsAppMessage(
-                from,
-                `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 10 minutes.`,
-                "en"
-              );
-              await sendWhatsAppMessage(
-                from,
-                `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 10 मिनट प्रतीक्षा करें।`,
-                "hi"
-              );
-              await sendWhatsAppMessage(
-                from,
-                `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 10 મિનિટ રાહ જુઓ.`,
-                "gu"
-              );
-              remainingTime = 10 * 60 * 1000; // Reset remaining time for another 5 minutes
-              setTimeout(pollLatLng, intervalTime); // Restart polling
-            }
-          }
-        } catch (error) {
-          console.error("Error polling API:", error);
-          setTimeout(pollLatLng, intervalTime); // Retry after 1 minute
-        }
-      };
+      //       if (remainingTime > 0) {
+      //         // Resend data and continue polling
+      //         console.log(
+      //           `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
+      //         );
+      //         setTimeout(pollLatLng, intervalTime);
+      //       } else {
+      //         await axios.get(url); // Resend data
+      //         // Notify user about new complaint registration
+      //         await sendWhatsAppMessage(
+      //           from,
+      //           `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 10 minutes.`,
+      //           "en"
+      //         );
+      //         await sendWhatsAppMessage(
+      //           from,
+      //           `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 10 मिनट प्रतीक्षा करें।`,
+      //           "hi"
+      //         );
+      //         await sendWhatsAppMessage(
+      //           from,
+      //           `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 10 મિનિટ રાહ જુઓ.`,
+      //           "gu"
+      //         );
+      //         remainingTime = 10 * 60 * 1000; // Reset remaining time for another 5 minutes
+      //         setTimeout(pollLatLng, intervalTime); // Restart polling
+      //       }
+      //     }
+      //   } catch (error) {
+      //     console.error("Error polling API:", error);
+      //     setTimeout(pollLatLng, intervalTime); // Retry after 1 minute
+      //   }
+      // };
 
-      // Start polling
-      pollLatLng();
+      // // Start polling
+      // pollLatLng();
     } else {
       // Send failure messages
       await sendWhatsAppMessage(
