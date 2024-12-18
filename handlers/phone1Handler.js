@@ -718,10 +718,6 @@ async function submitComplaint(from, userState) {
           const timeDiffServer =
             Math.abs(indianTime.getTime() - serverTime.getTime()) / 1000 / 60; // in minutes
           console.log(
-            `recevie time: ${receivedDate}, server time: ${serverTime}, current time ${indianTime}`
-          );
-          console.log(timeDiffReceived, timeDiffServer);
-          console.log(
             `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}`
           );
 
