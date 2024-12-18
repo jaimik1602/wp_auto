@@ -51,7 +51,7 @@ function resetUserState(from) {
       "તમારો સમય સમાપ્ત થઈ ગયો છે. વાતચીત શરૂ કરવા માટે 'Hi' મોકલો.",
       "gu"
     );
-  }, 10 * 60 * 1000); // 5 minutes in milliseconds
+  }, 30 * 60 * 1000); // 5 minutes in milliseconds
 }
 
 exports.handleMessage = async (req, res) => {
@@ -686,7 +686,7 @@ async function submitComplaint(from, userState) {
 
       // Polling function to check lat-long matching and time difference
       const intervalTime = 60 * 1000; // 1 minute in milliseconds
-      let remainingTime = 10 * 60 * 1000; // 5 minutes in milliseconds
+      let remainingTime = 25 * 60 * 1000; // 5 minutes in milliseconds
 
       const pollLatLng = async () => {
         try {
