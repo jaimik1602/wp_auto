@@ -709,9 +709,8 @@ async function submitComplaint(from, userState) {
           const serverTime = parseDate(apiData.servertime);
           const currentTime = new Date();
           // Convert to IST
-          const indianTime = currentTime.toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-          });
+          const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+          const indianTime = new Date(currentTime.getTime() + istOffset);
 
           // Calculate time differences
           const timeDiffReceived =
