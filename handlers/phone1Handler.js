@@ -403,7 +403,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
       );
 
       const vehicleCount = countResult[0].vehicle_count;
-
+      console.log("Limit " + limit);
       if (vehicleCount >= limit) {
         // User has already registered two vehicles this week
         console.log("Limit Error");
