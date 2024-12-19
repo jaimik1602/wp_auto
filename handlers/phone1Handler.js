@@ -161,7 +161,7 @@ exports.handleMessage = async (req, res) => {
       } else {
         var userlevel = await checkUserLevel(phoneNumber);
         //user level check
-        if (userlevel) {
+        if (userlevel.user_level) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
           userState.agency = response.data[0].agency;
@@ -202,7 +202,8 @@ exports.handleMessage = async (req, res) => {
           var result = await weekCheck(
             formattedVehicleNumber,
             phoneNumber,
-            currentWeek
+            currentWeek,
+            userlevel.vehicle_count
           );
           if (result) {
             userState.vehicleNumber = formattedVehicleNumber;
@@ -381,7 +382,7 @@ const getCurrentWeek = () => {
   return Math.ceil((days + startOfYear.getDay() + 1) / 7);
 };
 
-async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
+async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
   try {
     // Step 1: Check if the vehicle is already registered this week
     const [result] = await db.query(
@@ -402,7 +403,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek) {
 
       const vehicleCount = countResult[0].vehicle_count;
 
-      if (vehicleCount >= 1) {
+      if (vehicleCount >= limit) {
         // User has already registered two vehicles this week
         console.log("Limit Error");
         return false; // Limit reached, return false
@@ -460,7 +461,11 @@ async function checkUserLevel(mobileNumber) {
     );
 
     if (results.length > 0) {
-      return results[0].user_level === 1; // Returns true if user_level is 1, else false
+      // return user_level: results[0].user_level, results[0].vehicle_count; // Returns true if user_level is 1, else false
+      return {
+        user_level: results[0].user_level,
+        vehicle_count: results[0].vehicle_count,
+      };
     } else {
       return false; // Returns false if user not found
     }
