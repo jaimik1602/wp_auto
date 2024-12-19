@@ -457,7 +457,7 @@ async function saveContactToDatabase(number, name) {
 async function checkUserLevel(mobileNumber) {
   try {
     const [results] = await db.execute(
-      "SELECT user_level FROM users WHERE phone_number = ?",
+      "SELECT * FROM users WHERE phone_number = ?",
       [mobileNumber]
     );
 
