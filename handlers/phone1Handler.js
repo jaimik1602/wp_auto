@@ -658,7 +658,178 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
 }
 
 // Submit complaint to another API
+// async function submitComplaint(from, userState) {
+//   const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}&agency=${userState.agency}&subagency=${userState.subagency}&number=${from}`;
+
+//   try {
+//     const response = await axios.get(url);
+//     if (response.data?.msg === "success") {
+//       // Send success messages in multiple languages
+//       await sendWhatsAppMessage(
+//         from,
+//         "Your complaint has been submitted successfully.",
+//         "en"
+//       );
+//       await sendWhatsAppMessage(
+//         from,
+//         "आपकी शिकायत सफलतापूर्वक दर्ज की गई है।",
+//         "hi"
+//       );
+//       await sendWhatsAppMessage(
+//         from,
+//         "તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.",
+//         "gu"
+//       );
+
+//       // Polling function to check lat-long matching and time difference
+//       const intervalTime = 60 * 1000; // 1 minute in milliseconds
+//       let remainingTime = 25 * 60 * 1000; // 5 minutes in milliseconds
+
+//       const pollLatLng = async () => {
+//         try {
+//           // Fetch updated data from the API
+//           const apiResponse = await axios.get(
+//             `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${userState.vehicleNumber}`
+//           );
+
+//           const parseDate = (str) => {
+//             const [day, month, year, hours, minutes, seconds] = str
+//               .split(/[/ :]/)
+//               .map(Number);
+//             return new Date(year, month - 1, day, hours, minutes, seconds);
+//           };
+
+//           const apiData = apiResponse.data[0]; // Assuming the API returns an array
+//           const apiLatitude = parseFloat(apiData.lattitude).toFixed(6);
+//           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
+//           const receivedDate = parseDate(apiData.received_Date);
+//           const serverTime = parseDate(apiData.servertime);
+//           const currentTime = new Date();
+//           // Convert to IST
+//           const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+//           const indianTime = new Date(currentTime.getTime() + istOffset);
+
+//           // Calculate time differences
+//           const timeDiffReceived =
+//             Math.abs(indianTime.getTime() - receivedDate.getTime()) / 1000 / 60; // in minutes
+//           const timeDiffServer =
+//             Math.abs(indianTime.getTime() - serverTime.getTime()) / 1000 / 60; // in minutes
+//           console.log(
+//             `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}`
+//           );
+
+//           // Compare with userState latitude, longitude, and time difference
+//           if (
+//             userState.latitude === apiLatitude &&
+//             userState.longitude === apiLongitude &&
+//             timeDiffReceived <= 25 &&
+//             timeDiffServer <= 25
+//           ) {
+//             // Send data update success message
+//             await sendWhatsAppMessage(
+//               from,
+//               `Your data for ${userState.vehicleNumber} has been updated successfully.`,
+//               "en"
+//             );
+//             await sendWhatsAppMessage(
+//               from,
+//               `आपका ${userState.vehicleNumber} का डेटा सफलतापूर्वक अपडेट हो गया है।`,
+//               "hi"
+//             );
+//             await sendWhatsAppMessage(
+//               from,
+//               `તમારા ${userState.vehicleNumber} નો ડેટા સફળતાપૂર્વક અપડેટ થયો છે.`,
+//               "gu"
+//             );
+//             return; // Stop polling
+//           } else {
+//             remainingTime -= intervalTime;
+
+//             if (remainingTime > 0) {
+//               // Resend data and continue polling
+//               console.log(
+//                 `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
+//               );
+//               setTimeout(pollLatLng, intervalTime);
+//             }
+//           }
+//         } catch (error) {
+//           console.error("Error polling API:", error);
+//           setTimeout(pollLatLng, intervalTime); // Retry after 1 minute
+//         }
+//       };
+
+//       // Start polling
+//       pollLatLng();
+//     } else {
+//       // Send failure messages
+//       await sendWhatsAppMessage(
+//         from,
+//         "Your complaint submission failed. Please try again later.",
+//         "en"
+//       );
+//       await sendWhatsAppMessage(
+//         from,
+//         "आपकी शिकायत सबमिट नहीं की गई। कृपया बाद में पुनः प्रयास करें।",
+//         "hi"
+//       );
+//       await sendWhatsAppMessage(
+//         from,
+//         "તમારી ફરિયાદ સબમિશન નિષ્ફળ. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.",
+//         "gu"
+//       );
+//     }
+//   } catch (error) {
+//     console.error("Complaint submission error:", error);
+//     await sendWhatsAppMessage(
+//       from,
+//       "An error occurred while submitting your complaint. Please try again later.",
+//       "en"
+//     );
+//     await sendWhatsAppMessage(
+//       from,
+//       "आपकी शिकायत दर्ज करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।",
+//       "hi"
+//     );
+//     await sendWhatsAppMessage(
+//       from,
+//       "તમારી ફરિયાદ નોંધતી વખતે ભૂલ થઈ છે. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.",
+//       "gu"
+//     );
+//   }
+// }
+
+// Assuming we have a global object to store the last successful submission time for each user
+let lastComplaintSubmission = {};
+
 async function submitComplaint(from, userState) {
+  // Check if the user has already submitted a complaint successfully in the last 5 minutes
+  const currentTime = new Date().getTime();
+  const lastSubmissionTime = lastComplaintSubmission[from];
+
+  if (lastSubmissionTime && currentTime - lastSubmissionTime < 5 * 60 * 1000) {
+    // User tried to submit the complaint before 5 minutes passed
+    const remainingTime = Math.ceil(
+      (5 * 60 * 1000 - (currentTime - lastSubmissionTime)) / 1000
+    );
+    await sendWhatsAppMessage(
+      from,
+      `You can only submit your complaint again after ${remainingTime} seconds.`,
+      "en"
+    );
+    await sendWhatsAppMessage(
+      from,
+      `आप अपनी शिकायत फिर से ${remainingTime} सेकंड में सबमिट कर सकते हैं।`,
+      "hi"
+    );
+    await sendWhatsAppMessage(
+      from,
+      `તમે તમારી ફરિયાદ ફરીથી ${remainingTime} સેકન્ડમાં સબમિટ કરી શકો છો.`,
+      "gu"
+    );
+    return; // Exit the function if 5 minutes haven't passed
+  }
+
   const url = `https://app.jaimik.com/wp_api/wp_push.php?vehicleNumber=${userState.vehicleNumber}&imei=${userState.imei}&lat=${userState.latitude}&long=${userState.longitude}&agency=${userState.agency}&subagency=${userState.subagency}&number=${from}`;
 
   try {
@@ -680,6 +851,9 @@ async function submitComplaint(from, userState) {
         "તમારી ફરિયાદ સફળતાપૂર્વક નોંધાઈ છે.",
         "gu"
       );
+
+      // Update last complaint submission time to prevent further submissions within 5 minutes
+      lastComplaintSubmission[from] = currentTime;
 
       // Polling function to check lat-long matching and time difference
       const intervalTime = 60 * 1000; // 1 minute in milliseconds
@@ -704,10 +878,7 @@ async function submitComplaint(from, userState) {
           const apiLongitude = parseFloat(apiData.longitude).toFixed(6);
           const receivedDate = parseDate(apiData.received_Date);
           const serverTime = parseDate(apiData.servertime);
-          const currentTime = new Date();
-          // Convert to IST
-          const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-          const indianTime = new Date(currentTime.getTime() + istOffset);
+          const indianTime = new Date(currentTime + 5.5 * 60 * 60 * 1000); // IST is UTC+5:30
 
           // Calculate time differences
           const timeDiffReceived =
@@ -715,9 +886,8 @@ async function submitComplaint(from, userState) {
           const timeDiffServer =
             Math.abs(indianTime.getTime() - serverTime.getTime()) / 1000 / 60; // in minutes
           console.log(
-            `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}`
+            `push: ${userState.latitude}, ${userState.longitude}::server ${apiLatitude}, ${apiLongitude}, time ${timeDiffReceived}, ${timeDiffServer}`
           );
-
           // Compare with userState latitude, longitude, and time difference
           if (
             userState.latitude === apiLatitude &&
@@ -747,9 +917,6 @@ async function submitComplaint(from, userState) {
 
             if (remainingTime > 0) {
               // Resend data and continue polling
-              console.log(
-                `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
-              );
               setTimeout(pollLatLng, intervalTime);
             }
           }
