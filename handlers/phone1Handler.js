@@ -463,6 +463,7 @@ async function checkUserLevel(mobileNumber) {
 
     if (results.length > 0) {
       // return user_level: results[0].user_level, results[0].vehicle_count; // Returns true if user_level is 1, else false
+      console.log(results[0].vehicle_count);
       return {
         user_level: results[0].user_level,
         vehicle_count: results[0].vehicle_count,
