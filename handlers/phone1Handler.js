@@ -70,11 +70,11 @@ exports.handleMessage = async (req, res) => {
   const text = message.text?.body?.trim();
   const currentWeek = getCurrentWeek();
 
-  console.log("Handling message for Phone 1:", text);
+  // console.log("Handling message for Phone 1:", text);
 
   // Save the number and WhatsApp name to the database
   var temp = await saveContactToDatabase(from, name);
-  console.log(temp);
+  // console.log(temp);
 
   if (!userSessions[from]) resetUserState(from);
 
@@ -160,7 +160,6 @@ exports.handleMessage = async (req, res) => {
         }
       } else {
         var userlevel = await checkUserLevel(phoneNumber);
-        console.log(userlevel.user_level);
         //user level check
         if (userlevel.user_level) {
           userState.vehicleNumber = formattedVehicleNumber;
@@ -265,7 +264,6 @@ exports.handleMessage = async (req, res) => {
       }
     } else if (userState.step === 2) {
       const buttonId = message.interactive.button_reply.id;
-      console.log(buttonId);
       if (buttonId === "update_button") {
         await sendLocationRequest(from);
         userState.step = 3;
@@ -299,7 +297,6 @@ exports.handleMessage = async (req, res) => {
         const { latitude, longitude } = message.location;
         userState.latitude = parseFloat(latitude).toFixed(6);
         userState.longitude = parseFloat(longitude).toFixed(6);
-        console.log(userState.latitude, userState.longitude);
         await submitComplaint(from, userState);
         resetUserState(from);
       } else {
@@ -403,7 +400,6 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
       );
 
       const vehicleCount = countResult[0].vehicle_count;
-      console.log("Limit " + limit);
       if (vehicleCount >= limit) {
         // User has already registered two vehicles this week
         console.log("Limit Error");
@@ -428,8 +424,6 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
 // Database function to save contact information
 async function saveContactToDatabase(number, name) {
   try {
-    console.log("save run!!!");
-
     // Query to check if the phone_number and name match
     const checkQuery = `SELECT * FROM users WHERE phone_number = ? AND name = ?`;
     const [results] = await db.execute(checkQuery, [number, name]);
@@ -463,7 +457,6 @@ async function checkUserLevel(mobileNumber) {
 
     if (results.length > 0) {
       // return user_level: results[0].user_level, results[0].vehicle_count; // Returns true if user_level is 1, else false
-      console.log(results[0].vehicle_count);
       return {
         user_level: results[0].user_level,
         vehicle_count: results[0].vehicle_count,
@@ -641,9 +634,6 @@ async function fetchVehicle(vehicleNumber, phoneNumber) {
     const res = await axios.get(
       `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`
     );
-    console.log(
-      `https://app.jaimik.com/wp_api/wp_check.php?vehicleNumber=${vehicleNumber}`
-    );
 
     if (res.data && res.data[0] && res.data[0].deviceid) {
       // After verifying, check and add to the database
@@ -761,26 +751,6 @@ async function submitComplaint(from, userState) {
                 `Lat/Long or time mismatch for ${userState.vehicleNumber}. Retrying in 1 minute...`
               );
               setTimeout(pollLatLng, intervalTime);
-            } else {
-              // await axios.get(url); // Resend data
-              // Notify user about new complaint registration
-              // await sendWhatsAppMessage(
-              //   from,
-              //   `Your vehicle no. ${userState.vehicleNumber} data is not updated yet. I have again successfully registered a complaint for vehicle no. ${userState.vehicleNumber}. Please wait for another 10 minutes.`,
-              //   "en"
-              // );
-              // await sendWhatsAppMessage(
-              //   from,
-              //   `आपकी गाड़ी ${userState.vehicleNumber} का डेटा अभी तक अपडेट नहीं हुआ है। मैंने फिर से गाड़ी ${userState.vehicleNumber} के लिए शिकायत दर्ज की है। कृपया अगले 10 मिनट प्रतीक्षा करें।`,
-              //   "hi"
-              // );
-              // await sendWhatsAppMessage(
-              //   from,
-              //   `તમારી ગાડી નંબર ${userState.vehicleNumber} ના ડેટા હજુ સુધી અપડેટ નથી થયા. મેં ફરીથી ${userState.vehicleNumber} માટે ફરિયાદ નોંધાવી છે. કૃપા કરીને બીજા 10 મિનિટ રાહ જુઓ.`,
-              //   "gu"
-              // );
-              // remainingTime = 10 * 60 * 1000; // Reset remaining time for another 5 minutes
-              // setTimeout(pollLatLng, intervalTime); // Restart polling
             }
           }
         } catch (error) {
