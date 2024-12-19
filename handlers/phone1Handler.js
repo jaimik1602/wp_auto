@@ -160,7 +160,8 @@ exports.handleMessage = async (req, res) => {
         }
       } else {
         var userlevel = await checkUserLevel(phoneNumber);
-        //user level check
+        console.log(userlevel.user_level);
+        //user level checks
         if (userlevel.user_level) {
           userState.vehicleNumber = formattedVehicleNumber;
           userState.imei = response.data[0].deviceid;
