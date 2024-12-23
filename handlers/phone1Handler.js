@@ -404,6 +404,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
         console.log("Limit Error");
         return false; // Limit reached, return false
       } else {
+        console.log(limit + "limit");
         // Step 3: Register the new vehicle
         await db.query(
           "INSERT INTO weekly_data (vehicle_number, mobile_number, week, created_at) VALUES (?, ?, ?, NOW())",
