@@ -71,10 +71,8 @@ exports.handleMessage = async (req, res) => {
   const currentWeek = getCurrentWeek();
 
   // console.log("Handling message for Phone 1:", text);
-
   // Save the number and WhatsApp name to the database
   var temp = await saveContactToDatabase(from, name);
-  // console.log(temp);
 
   if (!userSessions[from]) resetUserState(from);
 
@@ -402,6 +400,7 @@ async function weekCheck(vehicleNumber, mobileNumber, currentWeek, limit) {
       const vehicleCount = countResult[0].vehicle_count;
       if (vehicleCount >= limit) {
         // User has already registered two vehicles this week
+        console.log(limit + "limit");
         console.log("Limit Error");
         return false; // Limit reached, return false
       } else {
