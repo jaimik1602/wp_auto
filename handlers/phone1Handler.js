@@ -405,7 +405,7 @@ const checkVehBlockStatus = async (vehicle_number) => {
       return false; // Number not found
     }
 
-    return results[0].blocked === 1; // Return true if the user is blocked
+    return results[0].block === 1; // Return true if the user is blocked
   } catch (error) {
     console.error("Error checking block status:", error);
     throw new Error("Database error");
