@@ -376,7 +376,7 @@ exports.handleMessage = async (req, res) => {
 const checkBlockStatus = async (phoneNumber) => {
   try {
     const query = "SELECT blocked FROM users WHERE phone_number = ? LIMIT 1";
-    const [results] = await db.promise().query(query, [phoneNumber]);
+    const [results] = await db.execute(query, [phoneNumber]);
 
     if (results.length === 0) {
       return false; // Number not found
