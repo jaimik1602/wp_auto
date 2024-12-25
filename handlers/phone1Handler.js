@@ -401,6 +401,7 @@ const checkVehBlockStatus = async (vehicle_number) => {
     const [results] = await db.execute(query, [vehicle_number]);
 
     if (results.length === 0) {
+      console.log(results);
       return false; // Number not found
     }
 
