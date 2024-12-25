@@ -111,7 +111,12 @@ exports.handleMessage = async (req, res) => {
       console.log(
         `Vehicle Number: ${formattedVehicleNumber}, Phone Number: ${phoneNumber}`
       );
-
+      // Check if the sender is blocked
+      const isBlocked = await checkVehBlockStatus(formattedVehicleNumber); // Replace with your blocklist function
+      if (isBlocked) {
+        console.log(`blocked:- ${formattedVehicleNumber}`);
+        return; // Stop further processing
+      }
       const response = await fetchVehicle(formattedVehicleNumber, phoneNumber);
 
       if (!response.success || !response.data[0]?.deviceid) {
@@ -377,6 +382,23 @@ const checkBlockStatus = async (phoneNumber) => {
   try {
     const query = "SELECT blocked FROM users WHERE phone_number = ? LIMIT 1";
     const [results] = await db.execute(query, [phoneNumber]);
+
+    if (results.length === 0) {
+      return false; // Number not found
+    }
+
+    return results[0].blocked === 1; // Return true if the user is blocked
+  } catch (error) {
+    console.error("Error checking block status:", error);
+    throw new Error("Database error");
+  }
+};
+
+const checkVehBlockStatus = async (vehicle_number) => {
+  try {
+    const query =
+      "SELECT block FROM vehicle_list WHERE vehicle_number = ? LIMIT 1";
+    const [results] = await db.execute(query, [vehicle_number]);
 
     if (results.length === 0) {
       return false; // Number not found
