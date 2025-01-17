@@ -59,13 +59,13 @@ exports.handleMessage = async (req, res) => {
   app.use(bodyParser.json());
 
   console.log(JSON.stringify(req.body, null, 2));
-  const messages = req.body.entry[0].changes[0].value.messages;
+  const messages = req.body.whatsapp_webhook_payload.entry[0].changes[0].value.messages;
   if (!messages || messages.length === 0) return res.sendStatus(200);
 
   const message = messages[0];
   const from = message.from;
   const name =
-    req.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
+    req.body.whatsapp_webhook_payload.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
     "Unknown";
   const text = message.text?.body?.trim();
   const currentWeek = getCurrentWeek();
