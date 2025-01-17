@@ -14,6 +14,7 @@ app.post("/webhook", (req, res) => {
   const body = req.body;
   // console.log(body);
   // console.log(body.whatsapp_webhook_payload);
+  console.log("Full Data:", JSON.stringify(body.whatsapp_webhook_payload, null, 2));
 
   if (body && body.entry && body.entry.length > 0) {
     const entry = body.entry[0];
