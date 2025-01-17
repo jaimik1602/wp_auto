@@ -12,7 +12,7 @@ const db = mysql.createPool({
 });
 
 const WHATSAPP_API_URL =
-  "https://whatsapp.jaimik.com/api/7975c527-78b1-4339-ba64-76b3315a38d4";
+  "https://graph.facebook.com/v21.0/469434999592396/messages";
 const ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
 
 // User sessions to manage chat state
