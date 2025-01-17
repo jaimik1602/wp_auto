@@ -508,26 +508,58 @@ async function checkUserLevel(mobileNumber) {
   }
 }
 
-async function sendWhatsAppMessage(to, text, language) {
-  const languages = {
-    en: "en_US",
-    hi: "hi_IN",
-    gu: "gu_IN",
-  };
-  const selectedLanguage = languages[language] || "en_US";
-  await axios.post(
-    WHATSAPP_API_URL,
-    {
-      messaging_product: "whatsapp",
-      to,
-      text: { body: text },
-      language: { code: selectedLanguage },
-    },
-    { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
-  );
-}
+// async function sendWhatsAppMessage(to, text, language) {
+//   const languages = {
+//     en: "en_US",
+//     hi: "hi_IN",
+//     gu: "gu_IN",
+//   };
+//   const selectedLanguage = languages[language] || "en_US";
+//   await axios.post(
+//     WHATSAPP_API_URL,
+//     {
+//       messaging_product: "whatsapp",
+//       to,
+//       text: { body: text },
+//       language: { code: selectedLanguage },
+//     },
+//     { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+//   );
+// }
 
 // Function to check and add vehicle number and phone number to the database
+
+async function sendWhatsAppMessage(to, text, language) {
+  const languages = {
+    en: "en",
+    hi: "hi",
+    gu: "gu",
+  };
+
+  const selectedLanguage = languages[language] || "en";
+
+  // Define the payload
+  const payload = {
+    messaging_product: "whatsapp",
+    phone_number: to,
+    message_body: text,
+  };
+
+  // Make the API request
+  try {
+    const response = await axios.post(WHATSAPP_API_URL, payload, {
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+    });
+
+    console.log("Message sent successfully:", response.data);
+  } catch (error) {
+    console.error(
+      "Error sending message:",
+      error.response?.data || error.message
+    );
+  }
+}
+
 async function checkAndAddVehicleToDB(vehicleNumber, phoneNumber) {
   try {
     // Check if the vehicle number already exists in the database
