@@ -531,33 +531,21 @@ async function checkUserLevel(mobileNumber) {
 
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
-    en: "en",
-    hi: "hi",
-    gu: "gu",
+    en: "en_US",
+    hi: "hi_IN",
+    gu: "gu_IN",
   };
-
-  const selectedLanguage = languages[language] || "en";
-
-  // Define the payload
-  const payload = {
-    messaging_product: "whatsapp",
-    phone_number: to,
-    message_body: text,
-  };
-
-  // Make the API request
-  try {
-    const response = await axios.post(WHATSAPP_API_URL, payload, {
-      headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
-    });
-
-    console.log("Message sent successfully:", response.data);
-  } catch (error) {
-    console.error(
-      "Error sending message:",
-      error.response?.data || error.message
-    );
-  }
+  const selectedLanguage = languages[language] || "en_US";
+  await axios.post(
+    WHATSAPP_API_URL,
+    {
+      messaging_product: "whatsapp",
+      to,
+      text: { body: text },
+      language: { code: selectedLanguage },
+    },
+    { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+  );
 }
 
 async function checkAndAddVehicleToDB(vehicleNumber, phoneNumber) {
