@@ -59,14 +59,15 @@ exports.handleMessage = async (req, res) => {
   app.use(bodyParser.json());
 
   console.log(JSON.stringify(req.body, null, 2));
-  const messages = req.body.whatsapp_webhook_payload.entry[0].changes[0].value.messages;
+  const messages =
+    req.body.whatsapp_webhook_payload.entry[0].changes[0].value.messages;
   if (!messages || messages.length === 0) return res.sendStatus(200);
 
   const message = messages[0];
   const from = message.from;
   const name =
-    req.body.whatsapp_webhook_payload.entry[0].changes[0].value.contacts?.[0]?.profile?.name ||
-    "Unknown";
+    req.body.whatsapp_webhook_payload.entry[0].changes[0].value.contacts?.[0]
+      ?.profile?.name || "Unknown";
   const text = message.text?.body?.trim();
   const currentWeek = getCurrentWeek();
 
@@ -537,14 +538,14 @@ async function sendWhatsAppMessage(to, text, language) {
   };
   const selectedLanguage = languages[language] || "en_US";
   await axios.post(
-    WHATSAPP_API_URL,
+    "https://whatsapp.jaimik.com/api/7975c527-78b1-4339-ba64-76b3315a38d4/contact/send-message",
     {
       messaging_product: "whatsapp",
-      to,
-      text: { body: text },
+      phone_number: to,
+      message_body: text,
       language: { code: selectedLanguage },
     },
-    { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+    { headers: { Authorization: `Bearer 4uk5QMZADzZbA0speIOoIJwEt9qzITUOwyOhEixAEt0eDlALI81CHoT7W3Fp6ppw` } }
   );
 }
 
