@@ -11,8 +11,8 @@ const PHONE_NUMBER_1 = "469434999592396";
 const PHONE_NUMBER_2 = "532876653233461";
 
 app.post("/webhook", (req, res) => {
-  console.log(req.body);
-  const body = req.body;
+  const body = req.body.whatsapp_webhook_payload[0];
+  console.log(body);
 
   if (body && body.entry && body.entry.length > 0) {
     const entry = body.entry[0];
