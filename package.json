@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
     "start": "node app.js; serve -s _static -l tcp://0.0.0.0:${PORT:-8080} -n",
-    "lint": "next lint"
   },
   "author": "",
   "license": "ISC",
