@@ -528,7 +528,7 @@ async function checkUserLevel(mobileNumber) {
 //   );
 // }
 
-// Function to check and add vehicle number and phone number to the database
+// Function to check and add vehicle number and phone number to the databas
 
 async function sendWhatsAppMessage(to, text, language) {
   const languages = {
