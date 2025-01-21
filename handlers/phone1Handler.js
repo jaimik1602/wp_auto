@@ -175,7 +175,7 @@ exports.handleMessage = async (req, res) => {
           userState.agency = response.data[0].agency;
           userState.subagency = response.data[0].subagency;
           if (
-            userState.subagency != "GaneshAtlanta" ||
+            userState.subagency != "SMARTSOLUTIONS" ||
             userState.subagency != "zplus"
           ) {
             resetUserState(from);
