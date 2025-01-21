@@ -1,9 +1,12 @@
 {
   "name": "wpapi",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node app.js; serve -s _static -l tcp://0.0.0.0:${PORT:-8080} -n",
+    "lint": "next lint"
   },
   "author": "",
   "license": "ISC",
