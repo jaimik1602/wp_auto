@@ -55,6 +55,14 @@ function resetUserState(from) {
 }
 
 exports.handleMessage = async (req, res) => {
+  await axios
+    .post("https://whatsinfinity.com/webhook/whatsapp/202501211304156SruZ", res)
+    .then((response) => {
+      console.log("Successfully forwarded response to jaimik.com");
+    })
+    .catch((error) => {
+      console.error("Error forwarding response to jaimik.com:", error.message);
+    });
   const app = express();
   app.use(bodyParser.json());
 
