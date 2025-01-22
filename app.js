@@ -38,7 +38,7 @@ app.post("/webhook", (req, res) => {
     }
   }
 
-  // Respond to WhatsApp webhook
+  // Respond to WhatsApp webhoo k
   res.sendStatus(200);
 });
 
